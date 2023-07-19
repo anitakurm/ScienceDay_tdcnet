@@ -13,8 +13,8 @@ features, target = make_regression(n_samples=100,
 
 # COMMAND ----------
 
-dddjjj
+
 
 # COMMAND ----------
 
-
+1+1+1
