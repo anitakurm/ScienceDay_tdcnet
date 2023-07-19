@@ -93,4 +93,79 @@ select.value
 
 # COMMAND ----------
 
+# MAGIC %md 
+# MAGIC # POC feature selection widget
+# MAGIC Select which features are selected in the df
+
+# COMMAND ----------
+
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv("/dbfs/FileStore/shared_uploads/kurm@tdcnet.dk/internet_session.csv")
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+dropdown = widgets.SelectMultiple(options = df.columns)
+
+def dropdown_eventhandler(change):
+    if (change.new == ALL):
+        display(df)
+    else:
+        display(df[change.new])
+
+
+dropdown.observe(dropdown_eventhandler, names='value')
+display(dropdown)
+
+# COMMAND ----------
+
+#dropdown = widgets.Dropdown(options = df.columns)
+dropdown = widgets.SelectMultiple(options = df.columns)
+output_feature_select = widgets.Output()
+
+def dropdown_eventhandler(change):
+    output_feature_select.clear_output()
+    with output_feature_select:
+        
+        display(df[list(change.new)])
+
+
+dropdown.observe(dropdown_eventhandler, names='value')
+
+
+display(dropdown)
+
+# COMMAND ----------
+
+display(output_feature_select)
+
+# COMMAND ----------
+
+# Helper functions
+ALL = 'ALL'
+def dropdown_eventhandler(change):
+    if (change.new == ALL):
+        display(df)
+    else:
+        display(df[change.new])
+
+# COMMAND ----------
+
+dropdown.observe(dropdown_eventhandler, names='value')
+
+# COMMAND ----------
+
+df.columns
+
+# COMMAND ----------
+
+df[['name', 'start_time']]
+
+# COMMAND ----------
+
 
