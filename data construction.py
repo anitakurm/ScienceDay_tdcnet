@@ -1,5 +1,8 @@
 # Databricks notebook source
 import numpy as np
+from matplotlib.pylab import plot
+import pandas as pd
+from sklearn import preprocessing
 # print features and target
 
 
@@ -80,63 +83,63 @@ cat_features = ['Occupation','Family Type','Family Interest','House Type']
 numerical_features = ['Number Of Residents', 'Average Age', 'Distance To Nearest Tower',
                       'Number Of Phones','Number Of Computers','Number Of Tvs','Customer Happiness',
                      'Time Spend On YouTube', 'Time Spend On TikTok', 'Time Spend On Instagram','Time Spend On Spotify']
-numerical_features = {
-   'Number Of Residents':{
-     'mean':1, 
-     'std': ,
-     'distribution': 'normal' 
-     },
-   'Average Age':{
-     'mean':1, 
-     'std': ,
-     'distribution': 'normal' 
-     },
-   'Distance To Nearest Tower':{
-     'mean':1, 
-     'std': ,
-     'distribution': 'normal' 
-     },
-   'Number Of Phones':{
-     'mean':1, 
-     'std': ,
-     'distribution': 'normal' 
-     },
-   'Number Of Computers':{
-     'mean':1, 
-     'std': ,
-     'distribution': 'normal' 
-     },
-   'Number Of Tvs':{
-     'mean':1, 
-     'std': ,
-     'distribution': 'normal' 
-     },
-   'Customer Happiness':{
-     'mean':1, 
-     'std': ,
-     'distribution': 'normal' 
-     },
-   'Time Spend On YouTube':{
-     'mean':1, 
-     'std': ,
-     'distribution': 'normal' 
-     },
-   'Time Spend On TikTok':{
-     'mean':1, 
-     'std': ,
-     'distribution': 'normal' 
-     },
-   'Time Spend On Instagram':{
-     'mean':1, 
-     'std': ,
-     'distribution': 'normal' 
-     },
-   'Time Spend On Spotify':{
-     'mean':1, 
-     'std': ,
-     'distribution': 'normal' 
-     },
- }                   
+# numerical_features = {
+#    'Number Of Residents':{
+#      'mean':1, 
+#      'std': ,
+#      'distribution': 'normal' 
+#      },
+#    'Average Age':{
+#      'mean':1, 
+#      'std': ,
+#      'distribution': 'normal' 
+#      },
+#    'Distance To Nearest Tower':{
+#      'mean':1, 
+#      'std': ,
+#      'distribution': 'normal' 
+#      },
+#    'Number Of Phones':{
+#      'mean':1, 
+#      'std': ,
+#      'distribution': 'normal' 
+#      },
+#    'Number Of Computers':{
+#      'mean':1, 
+#      'std': ,
+#      'distribution': 'normal' 
+#      },
+#    'Number Of Tvs':{
+#      'mean':1, 
+#      'std': ,
+#      'distribution': 'normal' 
+#      },
+#    'Customer Happiness':{
+#      'mean':1, 
+#      'std': ,
+#      'distribution': 'normal' 
+#      },
+#    'Time Spend On YouTube':{
+#      'mean':1, 
+#      'std': ,
+#      'distribution': 'normal' 
+#      },
+#    'Time Spend On TikTok':{
+#      'mean':1, 
+#      'std': ,
+#      'distribution': 'normal' 
+#      },
+#    'Time Spend On Instagram':{
+#      'mean':1, 
+#      'std': ,
+#      'distribution': 'normal' 
+#      },
+#    'Time Spend On Spotify':{
+#      'mean':1, 
+#      'std': ,
+#      'distribution': 'normal' 
+#      },
+#  }                   
 
 # COMMAND ----------
 
@@ -162,12 +165,12 @@ cov_matrix = np.eye(len(total_features))
 variables = {x:i for i,x in enumerate(total_features)}
 
 correlations = {
-'Time Spend On YouTube - Number Of Residents' : 0.5 ,
-'Occupation - Number Of Residents' : 0.1 ,
-'Occupation - Time Spend On YouTube' : 0.4 ,
-'Mobile Traffic - Number Of Residents' : 0.6 ,
-'Mobile Traffic - Time Spend On YouTube' : 0.5 ,
-'Mobile Traffic - Occupation' : 0.3 
+'Time Spend On YouTube - Number Of Residents' : 1,
+'Occupation - Number Of Residents' : 1 ,
+'Occupation - Time Spend On YouTube' : 0.0 ,
+'Mobile Traffic - Number Of Residents' : 1 ,
+'Mobile Traffic - Time Spend On YouTube' : 0 ,
+'Mobile Traffic - Occupation' : 0 
 }
 
 for corre in correlations:
@@ -197,22 +200,31 @@ correlated = np.random.multivariate_normal([1 for x in total_features], cov_matr
 
 # COMMAND ----------
 
-import pandas as pd
-from sklearn import preprocessing
+#Scale data to range [0,1]
 x = correlated 
 min_max_scaler = preprocessing.MinMaxScaler()
 x_scaled = min_max_scaler.fit_transform(x)
 df = pd.DataFrame(x_scaled)
 df.columns = total_features
-df.head()
+
 
 # COMMAND ----------
 
+#Transform numeric values
 df['Number Of Residents'] = np.floor(np.exp(df['Number Of Residents']*2)).astype(int)
 df['Time Spend On YouTube'] = np.exp(df['Time Spend On YouTube']*5.5)
+df['Mobile Traffic'] = df['Mobile Traffic']*20
+
+df.to_csv('transformed_data_raw.csv')
+
+
+# COMMAND ----------
+
+# Transform Categorical features from numeric to discrete
 bins= df['Occupation'].quantile(np.linspace(0,1,len(cat_variables['Occupation']['values'])))
 df['Occupation'] = pd.cut(df['Occupation'],bins, labels=cat_variables['Occupation']['names'])
-df['Mobile Traffic'] = np.floor(np.exp(df['Mobile Traffic']*4))
+df.to_csv('transformed_data_for_viewing.csv')
+
 
 # COMMAND ----------
 
@@ -225,8 +237,8 @@ from sklearn.model_selection import train_test_split
 
 # COMMAND ----------
 
-X = correlated[:,0:(I-1)]
-Y = correlated[:,(I-1):]
+X = df.values[:,0:(I-1)]
+Y = df.values[:,(I-1):]
 
 X_train, X_test, y_train, y_test = train_test_split(X,Y ,
                                    random_state=104, 
@@ -245,12 +257,15 @@ from matplotlib.pylab import plot
 
 # COMMAND ----------
 
-plot(y_test,y_test_predict,'.')
-
-# COMMAND ----------
-
 plot(y_train,y_train_predict,'.')
+plot(np.linspace(0,15,10),np.linspace(0,15,10))
 
 # COMMAND ----------
 
-
+# Finalize parameters and transformations
+# Create plots
+# Create models
+# Widgets for testing
+# Prep output
+# Live submits to track performence LEADERBOARD 
+# Notebook of "How to "
