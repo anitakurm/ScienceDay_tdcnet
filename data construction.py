@@ -408,10 +408,6 @@ df['Customer Happiness'] = df['Customer Happiness'].fillna(8)
 
 # COMMAND ----------
 
-
-
-# COMMAND ----------
-
 #export
 df_raw = df.copy()
 df.to_csv('transformed_data_raw.csv')
