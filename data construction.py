@@ -316,10 +316,10 @@ correlations_dict = {'Family Type - Occupation' : 0.6 ,
 'Mobile Traffic - Occupation' : 0.3 ,
 'Mobile Traffic - Family Type' : 0.3 ,
 'Mobile Traffic - Family Interest' : 0.5 ,
-'Mobile Traffic - House Type' : 0.3 ,
+'Mobile Traffic - House Type' : 0.0 ,
 'Mobile Traffic - Number Of Residents' : 0.6 ,
 'Mobile Traffic - Average Age' : -0.4 ,
-'Mobile Traffic - Distance To Nearest Tower [m]' : -0.3 ,
+'Mobile Traffic - Distance To Nearest Tower [m]' : -0.6 ,
 'Mobile Traffic - Number Of Phones' : 0.6 ,
 'Mobile Traffic - Number Of Computers' : 0.3 ,
 'Mobile Traffic - Number Of Tvs' : 0. ,
@@ -366,7 +366,7 @@ for i in range(I):
 
 # COMMAND ----------
 
-correlated = np.random.multivariate_normal([1 for x in total_features], cov_matrix, size=1000)
+correlated = np.random.multivariate_normal([1 for x in total_features], cov_matrix, size=1200)
 
 # COMMAND ----------
 
@@ -389,26 +389,37 @@ df.columns = total_features
 
 df['Number Of Residents'] = np.floor(np.exp(df['Number Of Residents']*2)).astype(int)
 df['Average Age'] = (df['Average Age']*60 + 20).astype(int)
-df['Distance To Nearest Tower [m]'] = df['Distance To Nearest Tower [m]'] * 2400
+df['Distance To Nearest Tower [m]'] = (np.random.lognormal(0.55,0.2, 1200) * df['Mobile Traffic'] * df['Distance To Nearest Tower [m]'])*150
+#df['Distance To Nearest Tower [m]'] = np.random.lognormal(0.65,0.28, 1200)  * df['Mobile Traffic']
 df['Number Of Phones'] =(np.floor(df['Number Of Phones'] * 6)).astype(int)
 df['Number Of Computers'] = (np.floor(df['Number Of Computers'] * 3.3)).astype(int)
 df['Number Of Tvs'] = (np.floor(df['Number Of Tvs'] * 3.4)).astype(int)
 df['Number Of Pets'] = (np.floor(df['Number Of Pets'] * 2.5)).astype(int)
-df['Time Spend On YouTube [min]'] = np.exp(df['Time Spend On YouTube [min]']*4)
+df['Time Spend On YouTube [min]'] = np.exp(df['Time Spend On YouTube [min]']*4) +np.random.randint(10, size=1200) 
 df['Time Spend On TikTok [min]'] = np.exp(df['Time Spend On TikTok [min]']*4.5)
 df['Time Spend On Instagram [min]'] = np.exp(df['Time Spend On Instagram [min]']*5)
 df['Time Spend On Spotify [min]'] = np.exp(df['Time Spend On Spotify [min]']*6)
 df['Mobile Traffic'] = df['Mobile Traffic']*20
 df['Customer Happiness'] = pd.cut(df['Customer Happiness'] ,[0,0.2,0.21,0.22,0.3,0.35,0.4,0.5,0.65,0.7,1], labels = [1,2,3,4,5,6,7,8,9,10])
 
+# COMMAND ----------
+
+ pd.Series(np.random.default_rng().exponential(scale=4, size=100)).hist()
+
+# COMMAND ----------
+
+import matplotlib.pyplot as plt
+from scipy.stats import lognorm
+
+# r = lognorm.rvs(1.1, size=1200) * df['Mobile Traffic']
+# r = (np.random.lognormal(0.55,0.2, 1200) * df['Mobile Traffic'] * df['Distance To Nearest Tower [m]'])*150
+
+plt.scatter( df['Distance To Nearest Tower [m]'] , df['Mobile Traffic'])
+plt.show()
 
 # COMMAND ----------
 
 df['Customer Happiness'] = df['Customer Happiness'].fillna(8)
-
-# COMMAND ----------
-
-
 
 # COMMAND ----------
 
