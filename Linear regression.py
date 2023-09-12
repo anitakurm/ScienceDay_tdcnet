@@ -8,7 +8,7 @@ import statsmodels.formula.api as smf
 # COMMAND ----------
 
 # Read Data
-df = pd.read_csv('/Workspace/Repos/sall@tdcnet.dk/ScienceDay_tdcnet/transformed_data_raw.csv')
+df_raw = pd.read_csv('/Workspace/Repos/sall@tdcnet.dk/ScienceDay_tdcnet/transformed_data_raw.csv')
 
 # COMMAND ----------
 
@@ -17,13 +17,19 @@ df_view = pd.read_csv('/Workspace/Repos/sall@tdcnet.dk/ScienceDay_tdcnet/transfo
 
 # COMMAND ----------
 
-df.head()
+# Hide last 200 observations for testing 
+df_unseen = df_raw[-200:].reset_index()
+df = df_raw[:-200].reset_index()
 
 # COMMAND ----------
 
 df.columns = df.columns.str.replace(' ', '_')
 df.columns = df.columns.str.replace('\[', '')
 df.columns = df.columns.str.replace('\]', '')
+
+# COMMAND ----------
+
+
 
 # COMMAND ----------
 
@@ -81,33 +87,72 @@ for i in variables:
 
 # COMMAND ----------
 
-# Add a "save" button so weights update
+# button = widgets.Button(description="Save weights")
+# output = widgets.Output()
+
+# display(button, output)
+
+# def on_button_clicked(b):
+#   #Get slider values as pandas df
+#   df_weights = pd.DataFrame(columns=['variable', 'weight'])
+#   counter = 0
+#   for i in variables: 
+#     new_name =  i.replace(' ','_')
+#     df_weights.loc[counter,'variable'] = i
+#     df_weights.loc[counter,'weight']= globals()[f'slider_{new_name}'].value
+#     counter +=1 
+
+#   with output:
+#       print("Weights Saved")
+
+# button.on_click(on_button_clicked)
 
 # COMMAND ----------
 
+# Add save button for weights and store data
+get_data_button = widgets.Button(description='Save Weights')
+output = widgets.Output()
+
+def get_data(b):
+
+  #Get slider values as pandas df
+  tmp_weights = pd.DataFrame(columns=['variable', 'weight'])
+  counter = 0
+  with output:
+    print("Weights Saved")
+
+  for i in variables: 
+    new_name =  i.replace(' ','_')
+    tmp_weights.loc[counter,'variable'] = i
+    tmp_weights.loc[counter,'weight']= globals()[f'slider_{new_name}'].value
+    counter +=1 
+    get_data.data = tmp_weights
+
+  print(get_data.data)
+
+  return get_data.data
+
+# DISPLAY BUTTON
+get_data_button.on_click(get_data)
+display(get_data_button, output)
 
 
 # COMMAND ----------
 
-#Get slider values as pandas df
-df_weights = pd.DataFrame(columns=['variable', 'weight'])
-counter = 0
-for i in variables: 
-  new_name =  i.replace(' ','_')
-  df_weights.loc[counter,'variable'] = i
-  df_weights.loc[counter,'weight']= globals()[f'slider_{new_name}'].value
-  counter +=1 
-
-# COMMAND ----------
-
-# Normalize weights between -1 and 1
-df_weights['weight'] = df_weights['weight']/10
+# Store weights as dataframe
+df_weights = get_data.data
+df_weights
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC
 # MAGIC ## Create manual linear regression using user input
+
+# COMMAND ----------
+
+# Normalize weights between -1 and 1
+df_weights['weight'] = df_weights['weight']/10
 
 # COMMAND ----------
 
@@ -164,16 +209,8 @@ plt.show()
 
 # COMMAND ----------
 
-# import numpy as np
-# from sklearn.linear_model import LinearRegression
-
-# COMMAND ----------
-
-# model = LinearRegression()
-
-# COMMAND ----------
-
 #Create formula
+# Remove Intercept
 formula ='Mobile_Traffic ~ -1 + '
 counter = 1
 for i in  X.columns.values:
@@ -190,8 +227,9 @@ import pandas as pd
 import statsmodels.formula.api as smf
 import statsmodels.api as sm
 res = smf.ols(formula, data=df_z).fit()
-res.summary()
 lm_prediction = res.predict(df_z[:])
+res.summary()
+
 
 # COMMAND ----------
 
@@ -210,6 +248,27 @@ plt.show()
 
 # COMMAND ----------
 
+# !pip install ipympl
+# %matplotlib ipympl
+
+# COMMAND ----------
+
+# %matplotlib inline  
+# %matplotlib ipympl
+# %pylab
+
+# COMMAND ----------
+
+# Show case Non Linear relationship
+plt.scatter(df['Distance_To_Nearest_Tower_m'], Y_actual)
+plt.title("Mobile Traffic - Linear Model")
+plt.ylabel("Mobile Traffic")
+plt.xlabel("-")
+plt.show()
+
+
+# COMMAND ----------
+
 # Example 3d plot
 import numpy as np
 import seaborn as sns
@@ -220,7 +279,6 @@ from mpl_toolkits import mplot3d
 model = smf.ols(formula='Mobile_Traffic ~ Average_Age + Number_Of_Phones', data=df)
 
 results = model.fit()
-
 x, y = model.exog_names[1:]
 
 x_range = np.arange(df[x].min(), df[x].max())
