@@ -188,19 +188,82 @@ for i in variables:
   X[i] = df_z[i] * alpha 
 Y_pred = X.sum(axis=1)
 
-# COMMAND ----------
-
-# plot
-import matplotlib.pyplot as plt
-
 Y_actual = df['Mobile_Traffic']
 Y_pred_trans = reverse_zscore(Y_pred, original_mean, original_std)
-plt.scatter(Y_pred_trans,Y_actual)
-plt.plot([0, max(max(Y_actual), max(Y_pred_trans))], [0,max(max(Y_actual), max(Y_pred_trans))], 'red')
-plt.title("Mobile Traffic - Manual Model")
-plt.ylabel("Actual")
-plt.xlabel("Predicted")
-plt.show()
+
+
+# COMMAND ----------
+
+# # plot 
+# import matplotlib.pyplot as plt
+
+# plt.scatter(Y_pred_trans,Y_actual)
+# plt.plot([0, max(max(Y_actual), max(Y_pred_trans))], [0,max(max(Y_actual), max(Y_pred_trans))], 'red')
+# plt.title("Mobile Traffic - Manual Model")
+# plt.ylabel("Actual")
+# plt.xlabel("Predicted")
+# plt.show()
+
+# COMMAND ----------
+
+# Evaluate model 
+# Use MAE because it's the easiest to understand ? 
+get_data_button = widgets.Button(description='Evaluate your model')
+output = widgets.Output()
+
+def get_data(b):
+  mape = round(np.mean(np.abs((Y_actual - Y_pred_trans)/Y_actual))*100,2)
+  mae = round(sum(abs(Y_actual - Y_pred_trans))/len(Y_actual),2)
+  with output:
+    print("Mean Absolute Error: " + str(mae))
+    print("On average your model predicts the mobile traffic to be" + str(mae) + " GB off from the actual value")
+    print("That corresponds to " + str(mape) + "% off the actual value on average" )
+    print("")
+    if mae < 2.3:
+      print("Good job! Can you beat your own record?")
+    if mae >= 5:
+      print("Try again! You can do better")
+
+
+  return 0 
+
+# DISPLAY BUTTON
+get_data_button.on_click(get_data)
+display(get_data_button, output)
+
+
+
+# COMMAND ----------
+
+# MAGIC %matplotlib inline
+# MAGIC
+# MAGIC from matplotlib.pyplot import *
+# MAGIC layout = widgets.Layout(width='auto', height='40px') #set width and height
+# MAGIC
+# MAGIC button = widgets.Button(description="Plot your model")
+# MAGIC out = widgets.Output()
+# MAGIC
+# MAGIC def on_button_clicked(b):
+# MAGIC     with out:
+# MAGIC         Y_actual = df['Mobile_Traffic']
+# MAGIC         Y_pred_trans = reverse_zscore(Y_pred, original_mean, original_std)
+# MAGIC         plt.scatter(Y_pred_trans,Y_actual)
+# MAGIC         plt.plot([0, max(max(Y_actual), max(Y_pred_trans))], [0,max(max(Y_actual), max(Y_pred_trans))], 'red')
+# MAGIC         plt.title("Mobile Traffic - Manual Model")
+# MAGIC         plt.ylabel("Actual")
+# MAGIC         plt.xlabel("Predicted")
+# MAGIC         plt.show()
+# MAGIC         # show()
+# MAGIC
+# MAGIC button.on_click(on_button_clicked)
+# MAGIC
+# MAGIC display(button)
+# MAGIC
+# MAGIC with out:
+# MAGIC     print("")
+# MAGIC     # plot([1,2],[1,2])
+# MAGIC     # show()
+# MAGIC out
 
 # COMMAND ----------
 
@@ -244,6 +307,10 @@ plt.title("Mobile Traffic - Linear Model")
 plt.ylabel("Actual")
 plt.xlabel("Predicted")
 plt.show()
+
+
+# COMMAND ----------
+
 
 
 # COMMAND ----------
