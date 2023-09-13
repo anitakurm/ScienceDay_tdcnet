@@ -8,12 +8,12 @@ import statsmodels.formula.api as smf
 # COMMAND ----------
 
 # Read Data
-df_raw = pd.read_csv('/Workspace/Repos/sall@tdcnet.dk/ScienceDay_tdcnet/transformed_data_raw.csv')
+df_raw = pd.read_csv('../data/transformed_data_raw.csv')
 
 # COMMAND ----------
 
 # Read Data
-df_view = pd.read_csv('/Workspace/Repos/sall@tdcnet.dk/ScienceDay_tdcnet/transformed_data_for_viewing.csv')
+df_view = pd.read_csv('../data/transformed_data_for_viewing.csv')
 
 # COMMAND ----------
 
@@ -62,23 +62,22 @@ layout = widgets.Layout(width='auto', height='40px') #set width and height
 
 # COMMAND ----------
 
-for i in variables:
-  new_name =  i.replace('_',' ')
-  globals()[f'slider_{i}'] = slider_Occupation = widgets.IntSlider(
-                                    min=slider_min,
-                                    max=slider_max,
-                                    step=1,
-                                    description=new_name + ': ',
-                                    value=slider_value,
-                                    layout=widgets.Layout(width='40%'),
-                                    style= {'description_width': '40%'}
-                                     )
+sliders = { 
+  i : widgets.IntSlider(
+    min=slider_min,
+    max=slider_max,
+    step=1,
+    description=i.replace("_", " ") + ': ',
+    value=slider_value,
+    layout=widgets.Layout(width='40%'),
+    style= {'description_width': '40%'}
+  ) for i in variables
+}
 
 # COMMAND ----------
 
-for i in variables: 
-  new_name =  i.replace(' ','_')
-  display(globals()[f'slider_{new_name}'])
+for s in sliders.values():
+  display(s)
 
 # COMMAND ----------
 
@@ -121,10 +120,9 @@ def get_data(b):
   with output:
     print("Weights Saved")
 
-  for i in variables: 
-    new_name =  i.replace(' ','_')
-    tmp_weights.loc[counter,'variable'] = i
-    tmp_weights.loc[counter,'weight']= globals()[f'slider_{new_name}'].value
+  for var_name, slider in sliders.items(): 
+    tmp_weights.loc[counter,'variable'] = var_name
+    tmp_weights.loc[counter,'weight']= slider.value
     counter +=1 
     get_data.data = tmp_weights
 
