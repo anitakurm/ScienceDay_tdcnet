@@ -14,7 +14,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import RobustScaler
 from sklearn.preprocessing import Normalizer
-
+import pandas as pd
+import warnings
+warnings.filterwarnings('ignore')
+#!pip install scikit-learn
 
 # Read Data
 def fetch_data():
@@ -71,6 +74,35 @@ print("Prepared data")
 
 prediction_log = []
 
+def make_sliders_A():
+  # define slider range and value
+  slider_min = 1
+  slider_max = 10
+  slider_value = 0
+
+  # set up slider layout
+  layout = widgets.Layout(width='auto', height='40px') #set width and height
+  
+  layer_list =  ['A. Number of layers', 'A. Number of nodes']
+  sliders = { 
+      i : wd.IntSlider(
+        min=slider_min,
+        max=slider_max,
+        step=1,
+        #description=i + ': ',
+        value=slider_value,
+        #layout=wd.Layout(width='60%'),
+        #style={'description_width': '100%'}
+      ) for i in layer_list
+    }
+  
+  return sliders
+
+sliders = make_sliders_A()
+
+def read_sliders():
+    weights = {name : slider.value/10 for var_name, slider in sliders.items()}
+    return weights
 
 def initiate_and_run_ann(hidden_layer_sizes=(2,1,3), alpha=0.0001, train_size=0.75, max_iter=500):
 
@@ -93,36 +125,12 @@ def initiate_and_run_ann(hidden_layer_sizes=(2,1,3), alpha=0.0001, train_size=0.
   # get AUC score instead!!
   score = ann.score(X_test, y_test)
 
-  return score
-
-def set_up_layer_sliders():
-  # define slider range and value
-  slider_min = 1
-  slider_max = 10
-  slider_value = 0
-
-  # set up slider layout
-  layout = widgets.Layout(width='auto', height='40px') #set width and height
-  
-  layer_list =  ['Layer 1','Layer 2','Layer 3', 'Layer 4', 'Layer 5']
-  for i in layer_list:
-    globals()[f'slider_{i}'] = widgets.IntSlider(
-                                    min=slider_min,
-                                    max=slider_max,
-                                    step=1,
-                                    description=i + ': ',
-                                    value=slider_value,
-                                    layout=widgets.Layout(width='40%'),
-                                    style= {'description_width': '40%'}
-                                     )
-  for i in layer_list: 
-    display(globals()[f'slider_{i}'])
-
+  return ann, score
   
 
 
 
-def run_get_slider_values():
+def run_ann_1():
   ann_architecture = []
   layer_list =  ['Layer 1','Layer 2','Layer 3', 'Layer 4', 'Layer 5']
   for i in layer_list: 
@@ -173,7 +181,8 @@ result_widget = wd.HTML(
 
 def click_button(b):
     weights = read_sliders()
-    Y_pred_trans = manual_predict(weights)
+    score, ann = initiate_and_run_ann()
+    Y_pred_trans = ann.predict(X_test)
     
     plot_manual_pred(ax1, Y_pred_trans)
     fig1.canvas.draw()
@@ -186,14 +195,15 @@ def click_button(b):
 
     result_widget.value = result_text(mae, mape)
 
-run_button.on_click(click_button)
+#run_button.on_click(click_button)
+run_button.on_click(run_ann_1)
 
 
-neural_net_1 = wd.HBox([
+main = wd.HBox([
     wd.VBox([slider_box, result_widget]),
     run_button,
     wd.VBox([
-        fig1.canvas,
+    #    fig1.canvas,
     ]),
 ])
     
