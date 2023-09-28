@@ -18,7 +18,7 @@ from sklearn.preprocessing import Normalizer
 
 # Read Data
 def fetch_data():
-  df = pd.read_csv('../transformed_data_raw.csv', index_col=0)
+  df = pd.read_csv('../data/transformed_data_raw.csv', index_col=0)
   df.columns = df.columns.str.replace(' ', '_')
   df.columns = df.columns.str.replace('\[', '')
   df.columns = df.columns.str.replace('\]', '')
@@ -54,13 +54,13 @@ def initiate_and_run_ann(hidden_layer_sizes=(2,1,3), alpha=0.0001, train_size=0.
 def set_up_layer_sliders():
   # define slider range and value
   slider_min = 1
-  slider_max = 10
-  slider_value = 0
+  slider_max = 40
+  slider_value = 10
 
   # set up slider layout
   layout = widgets.Layout(width='auto', height='40px') #set width and height
   
-  layer_list =  ['Layer 1','Layer 2','Layer 3', 'Layer 4', 'Layer 5']
+  layer_list =  ['Layer 1','Layer 2','Layer 3', 'Layer 4', 'Layer 5', 'Layer 6']
   for i in layer_list:
     globals()[f'slider_{i}'] = widgets.IntSlider(
                                     min=slider_min,
