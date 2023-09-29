@@ -417,6 +417,7 @@ df.loc[df['Average Age'] > 55,'Mobile Traffic'] = df.loc[df['Average Age'] > 55,
 df.loc[df['Average Age'] > 65,'Mobile Traffic'] = df.loc[df['Average Age'] > 65,'Mobile Traffic'] - 2
 df.loc[df['Average Age'] > 75,'Mobile Traffic'] = df.loc[df['Average Age'] > 75,'Mobile Traffic'] - 6
 df.loc[df['Mobile Traffic'] < 0,'Mobile Traffic'] = 0
+df.loc[df['Distance To Nearest Tower [m]'] < 0,'Distance To Nearest Tower [m]'] = 10
 
 # COMMAND ----------
 
