@@ -188,7 +188,7 @@ correlations_dict = {'Family Type - Occupation' : 0.65 ,
 'Number Of Residents - Family Interest' : 0 ,
 'Number Of Residents - House Type' : 0 ,
 'Average Age - Occupation' : 0 ,
-'Average Age - Family Type' : -0.75 ,
+'Average Age - Family Type' : -0.6 ,
 'Average Age - Family Interest' : 0 ,
 'Average Age - House Type' : 0 ,
 'Average Age - Number Of Residents' : 0.35 ,
@@ -203,14 +203,14 @@ correlations_dict = {'Family Type - Occupation' : 0.65 ,
 'Number Of Phones - Family Interest' : 0 ,
 'Number Of Phones - House Type' : 0 ,
 'Number Of Phones - Number Of Residents' : 0.85 ,
-'Number Of Phones - Average Age' : 0.55 ,
+'Number Of Phones - Average Age' : 0.50 ,
 'Number Of Phones - Distance To Nearest Tower [m]' : 0 ,
 'Number Of Computers - Occupation' : 0.35 ,
 'Number Of Computers - Family Type' : 0.35 ,
 'Number Of Computers - Family Interest' : 0.35 ,
 'Number Of Computers - House Type' : 0 ,
 'Number Of Computers - Number Of Residents' : 0.85 ,
-'Number Of Computers - Average Age' : 0.55 ,
+'Number Of Computers - Average Age' : 0.50 ,
 'Number Of Computers - Distance To Nearest Tower [m]' : 0 ,
 'Number Of Computers - Number Of Phones' : 0.75 ,
 'Number Of Tvs - Occupation' : 0 ,
@@ -318,7 +318,7 @@ correlations_dict = {'Family Type - Occupation' : 0.65 ,
 'Mobile Traffic - Family Interest' : 0.5 ,
 'Mobile Traffic - House Type' : 0.0 ,
 'Mobile Traffic - Number Of Residents' : 0.65 ,
-'Mobile Traffic - Average Age' : -0.6 ,
+'Mobile Traffic - Average Age' : -0.65 ,
 'Mobile Traffic - Distance To Nearest Tower [m]' : -0.65 ,
 'Mobile Traffic - Number Of Phones' : 0.65 ,
 'Mobile Traffic - Number Of Computers' : 0.35 ,
@@ -393,7 +393,8 @@ df.columns = total_features
 
 df['Number Of Residents'] = np.floor(np.exp(df['Number Of Residents']*2)).astype(int)
 df['Average Age'] = (df['Average Age']*60 + 20).astype(int)
-df['Distance To Nearest Tower [m]'] = (np.random.lognormal(0.55,0.2, 12000) * df['Mobile Traffic'] * df['Distance To Nearest Tower [m]'])*150
+#df['Average Age'] = np.floor(np.exp(df['Average Age']*2)).astype(int)
+df['Distance To Nearest Tower [m]'] =( ((np.random.lognormal(0.55,0.2, 12000)*(-1) )* df['Mobile Traffic'] * df['Distance To Nearest Tower [m]']))*1500 +2000
 #df['Distance To Nearest Tower [m]'] = np.random.lognormal(0.65,0.28, 12000)  * df['Mobile Traffic']
 df['Number Of Phones'] =(np.floor(df['Number Of Phones'] * 6)).astype(int)
 df['Number Of Computers'] = (np.floor(df['Number Of Computers'] * 3.3)).astype(int)
@@ -403,7 +404,7 @@ df['Time Spend On YouTube [min]'] = np.exp(df['Time Spend On YouTube [min]']*4) 
 df['Time Spend On TikTok [min]'] = np.exp(df['Time Spend On TikTok [min]']*4.5)
 df['Time Spend On Instagram [min]'] = np.exp(df['Time Spend On Instagram [min]']*5)
 df['Time Spend On Spotify [min]'] = np.exp(df['Time Spend On Spotify [min]']*6)
-df['Mobile Traffic'] = df['Mobile Traffic']*20
+df['Mobile Traffic'] = df['Mobile Traffic']*20+4
 df['Customer Happiness'] = pd.cut(df['Customer Happiness'] ,[0,0.2,0.21,0.22,0.3,0.35,0.4,0.5,0.65,0.7,1], labels = [1,2,3,4,5,6,7,8,9,10])
 
 # COMMAND ----------
@@ -412,14 +413,18 @@ df['Customer Happiness'] = pd.cut(df['Customer Happiness'] ,[0,0.2,0.21,0.22,0.3
 
 # COMMAND ----------
 
-import matplotlib.pyplot as plt
-from scipy.stats import lognorm
+df.loc[df['Average Age'] > 55,'Mobile Traffic'] = df.loc[df['Average Age'] > 55,'Mobile Traffic'] - 2
+df.loc[df['Average Age'] > 65,'Mobile Traffic'] = df.loc[df['Average Age'] > 65,'Mobile Traffic'] - 2
+df.loc[df['Average Age'] > 75,'Mobile Traffic'] = df.loc[df['Average Age'] > 75,'Mobile Traffic'] - 6
+df.loc[df['Mobile Traffic'] < 0,'Mobile Traffic'] = 0
 
-# r = lognorm.rvs(1.1, size=1200) * df['Mobile Traffic']
-# r = (np.random.lognormal(0.55,0.2, 1200) * df['Mobile Traffic'] * df['Distance To Nearest Tower [m]'])*150
+# COMMAND ----------
 
-plt.scatter( df['Distance To Nearest Tower [m]'] , df['Mobile Traffic'])
-plt.show()
+import seaborn as sns
+pp = sns.pairplot(data=df,
+                  y_vars=['Mobile Traffic'],
+                  x_vars=['Number Of Residents', 'Average Age', 'Distance To Nearest Tower [m]','Number Of Phones'])
+
 
 # COMMAND ----------
 
@@ -447,7 +452,7 @@ for i in cat_features:
 df_raw = df.copy()
 df
 df = df.fillna(0)
-df.to_csv('transformed_data_raw.csv')
+df.to_csv('data/transformed_data_raw.csv')
 
 
 # COMMAND ----------
@@ -464,7 +469,7 @@ for i in cat_features:
   dictionary = dict(zip(df[i].value_counts().index.tolist(), cat_variables[i]['names']))
   df[i] = df[i].map( dictionary)
 
-df.to_csv('transformed_data_for_viewing.csv')
+df.to_csv('data/transformed_data_for_viewing.csv')
 
 
 # COMMAND ----------
