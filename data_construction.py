@@ -366,7 +366,7 @@ for i in range(I):
 
 # COMMAND ----------
 
-correlated = np.random.multivariate_normal([1 for x in total_features], cov_matrix, size=1200)
+correlated = np.random.multivariate_normal([1 for x in total_features], cov_matrix, size=12000)
 
 # COMMAND ----------
 
@@ -389,13 +389,13 @@ df.columns = total_features
 
 df['Number Of Residents'] = np.floor(np.exp(df['Number Of Residents']*2)).astype(int)
 df['Average Age'] = (df['Average Age']*60 + 20).astype(int)
-df['Distance To Nearest Tower [m]'] = (np.random.lognormal(0.55,0.2, 1200) * df['Mobile Traffic'] * df['Distance To Nearest Tower [m]'])*150
-#df['Distance To Nearest Tower [m]'] = np.random.lognormal(0.65,0.28, 1200)  * df['Mobile Traffic']
+df['Distance To Nearest Tower [m]'] = (np.random.lognormal(0.55,0.2, 12000) * df['Mobile Traffic'] * df['Distance To Nearest Tower [m]'])*150
+#df['Distance To Nearest Tower [m]'] = np.random.lognormal(0.65,0.28, 12000)  * df['Mobile Traffic']
 df['Number Of Phones'] =(np.floor(df['Number Of Phones'] * 6)).astype(int)
 df['Number Of Computers'] = (np.floor(df['Number Of Computers'] * 3.3)).astype(int)
 df['Number Of Tvs'] = (np.floor(df['Number Of Tvs'] * 3.4)).astype(int)
 df['Number Of Pets'] = (np.floor(df['Number Of Pets'] * 2.5)).astype(int)
-df['Time Spend On YouTube [min]'] = np.exp(df['Time Spend On YouTube [min]']*4) +np.random.randint(10, size=1200) 
+df['Time Spend On YouTube [min]'] = np.exp(df['Time Spend On YouTube [min]']*4) +np.random.randint(10, size=12000) 
 df['Time Spend On TikTok [min]'] = np.exp(df['Time Spend On TikTok [min]']*4.5)
 df['Time Spend On Instagram [min]'] = np.exp(df['Time Spend On Instagram [min]']*5)
 df['Time Spend On Spotify [min]'] = np.exp(df['Time Spend On Spotify [min]']*6)
@@ -404,7 +404,7 @@ df['Customer Happiness'] = pd.cut(df['Customer Happiness'] ,[0,0.2,0.21,0.22,0.3
 
 # COMMAND ----------
 
- pd.Series(np.random.default_rng().exponential(scale=4, size=100)).hist()
+pd.Series(np.random.default_rng().exponential(scale=4, size=100)).hist()
 
 # COMMAND ----------
 
@@ -425,7 +425,7 @@ df['Customer Happiness'] = df['Customer Happiness'].fillna(8)
 
 #export
 df_raw = df.copy()
-df.to_csv('transformed_data_raw.csv')
+df.to_csv('data/transformed_data_raw.csv')
 
 
 # COMMAND ----------
