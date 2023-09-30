@@ -52,7 +52,6 @@ def make_sliders():
     
     layout = wd.Layout(width='auto', height='40px') #set width and height
     
-    
     sliders = { 
       i : wd.IntSlider(
         min=slider_min,
@@ -67,6 +66,10 @@ def make_sliders():
     return sliders
 
 sliders = make_sliders()
+
+def reset_sliders(b):
+    for slider in sliders.values():
+        slider.value = 0
 
 def read_sliders():
     weights = {var_name : slider.value/10 for var_name, slider in sliders.items()}
@@ -94,6 +97,14 @@ def plot_manual_pred(ax, Y_pred_trans):
     ax.set_xlabel("Predicted")
     return ax
 
+def plot_prediction_log(ax):
+    ax.clear()
+    ax.plot(prediction_log_df["Time"], prediction_log_df["Mean Absolute Error"])
+    ax.set_title("Your progress")
+    ax.set_ylabel("Mean Absolute Error")
+    ax.set_xlabel("Time")
+    return ax
+
 def result_text(mae, mape):
     s = f"Mean Absolute Error: {mae:.3f} <br> " 
     s += f"On average your model predicts the mobile traffic to be {mae:.3f} GB off from the actual value<br>"
@@ -111,12 +122,18 @@ plt.ioff()
 fig1, ax1 = plt.subplots()
 fig1.canvas.header_visible = False
 
+fig2, ax2 = plt.subplots()
+fig2.canvas.header_visible = False
+
 slider_box = wd.HBox([
     wd.VBox([wd.HTML(v) for v in sliders]),
     wd.VBox([v for v in sliders.values()])
 ])
 
-run_button = wd.Button(description="=>", layout=wd.Layout(height='50px', width='50px'))
+run_button = wd.Button(description="=>", layout=wd.Layout(height='50px', width='75px'))
+
+reset_button = wd.Button(description="Reset", layout=wd.Layout(height='50px', width='75px'))
+reset_button.on_click(reset_sliders)
 
 result_widget = wd.HTML(
     value=result_text(10, 10)
@@ -142,16 +159,23 @@ def click_button(b):
 
     global prediction_log_df
     prediction_log_df = pd.DataFrame(prediction_log)
-    
+
+    plot_prediction_log(ax2)
+    fig2.canvas.draw()
+    fig2.canvas.flush_events()
+
     result_widget.value = result_text(mae, mape)
 
 run_button.on_click(click_button)
 
+
+
 main = wd.HBox([
     wd.VBox([slider_box, result_widget]),
-    run_button,
+    wd.VBox([run_button, reset_button]),
     wd.VBox([
         fig1.canvas,
+        fig2.canvas
     ]),
 ])
     
