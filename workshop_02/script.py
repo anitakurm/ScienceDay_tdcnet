@@ -38,6 +38,12 @@ Y_actual = df[target_var]
 print("Prepared data")
 
 prediction_log = []
+prediction_log_df = pd.DataFrame(columns = [
+    "Time",
+    "Mean Absolute Error", 
+    "Mean Percentage Error",
+    "Weights"
+])
 
 def make_sliders():
     slider_min = -10
@@ -91,7 +97,7 @@ def plot_manual_pred(ax, Y_pred_trans):
 def result_text(mae, mape):
     s = f"Mean Absolute Error: {mae:.3f} <br> " 
     s += f"On average your model predicts the mobile traffic to be {mae:.3f} GB off from the actual value<br>"
-    s += f"That corresponds to {mae:.2f} % off the actual value on average <br><br>"
+    s += f"That corresponds to {mape:.2f} % off the actual value on average <br><br>"
     if mae == 0:
         s += "Press the button for a first run"
     elif mae < 2.3:
@@ -124,16 +130,22 @@ def click_button(b):
     fig1.canvas.draw()
     fig1.canvas.flush_events()
 
-    mape = np.mean(np.abs((Y_actual - Y_pred_trans)/Y_actual))*100
+    mape = np.mean(np.abs((Y_actual - Y_pred_trans)/(np.maximum(Y_actual, 0.1))))*100
     mae = sum(abs(Y_actual - Y_pred_trans))/len(Y_actual)
     
-    prediction_log.append((dtime.now(), weights, Y_pred_trans, mape, mae))
+    prediction_log.append({
+        "Time": dtime.now(), 
+        "Mean Absolute Error": mae, 
+        "Mean Percentage Error" : mape,
+        "Weights" : weights
+    })
 
+    global prediction_log_df
+    prediction_log_df = pd.DataFrame(prediction_log)
+    
     result_widget.value = result_text(mae, mape)
 
 run_button.on_click(click_button)
-
-
 
 main = wd.HBox([
     wd.VBox([slider_box, result_widget]),
