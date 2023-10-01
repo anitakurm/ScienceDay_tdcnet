@@ -158,20 +158,26 @@ def result_text(mae, mape):
     # Skip this line on initial load
     if mae > 0:
         s += (
-            f'<div style="font-size: 1.2em">On average your model predicts the mobile traffic to be {mae:.3f} GB off from the actual value<br>'
+            f'<div style="font-size: 1.2em">On average your model predicts the mobile traffic to be {mae:.2f} GB off from the actual value<br>'
             f'That corresponds to <span style="font-weight: bold">{mape:.2f} %</span> off the actual value on average</div>'
         )
+        record = prediction_log_df.loc[:,"Mean Absolute Error"].min()
+        s3 = f'<div style="font-size: 1.2em"> Your current record: <span style="font-weight: bold">{record:.3f} </span></div>'
+    else:
+        s3 = ''
     
     if mae <= 0:
-        s2 = "Press the -> button for a first run!"
+        s2_val = "Press the -> button for a first run!"
     elif mae < 2.2:
-        s2 = "Awesome job! Can you beat your own record?"
+        s2_val = "Awesome job! Can you beat your own record?"
     elif mae < 3.5:
-        s2 = "You're on track, but you can do better.<br> Try again!"
+        s2_val = "You're on track, but you can do better.<br> Try again!"
     else:
-        s2 = "This is quite off :( <br>Maybe try something else by resetting."
+        s2_val = "This is quite off :( <br>Maybe try something else by resetting."
 
-    return s + f'<div style="font-size:1.5em;font-weight:bold;display: flex;justify-content: center;text-align: center;padding-top: 0.5em;">{s2}</div>'
+    s2 = f'<div style="font-size:1.5em;font-weight:bold;display: flex;justify-content: center;text-align: center;padding-top: 0.5em; padding-bottom:0.5em">{s2_val}</div>'
+    
+    return s + s2 + s3
 
 result_widget = wd.HTML(
     value=result_text(0, 0)
