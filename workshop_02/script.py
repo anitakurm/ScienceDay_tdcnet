@@ -129,29 +129,49 @@ def plot_prediction_log(ax):
     return ax
 
 # ================== BUTTONS =======================
-run_button = wd.Button(description="=>", layout=wd.Layout(height='50px', width='75px'))
+button_style = dict(
+        button_color = "royalblue", 
+        font_weight="bold", 
+        font_size="1.2em"
+    )
+run_button = wd.Button(
+    #description="=>", 
+    icon="arrow-right",
+    layout=wd.Layout(height='50px', width='75px'),
+    style=button_style
+)
 
-reset_button = wd.Button(description="Reset", layout=wd.Layout(height='50px', width='75px'))
+reset_button = wd.Button(
+    description="Reset", 
+    layout=wd.Layout(height='50px', width='75px'),
+    style=button_style
+)
 reset_button.on_click(reset_sliders)
 
 # ================= RESULT WIDGET ==================
 def result_text(mae, mape):
     s = (
-        f'<div style="font-size: 1.5em">Mean Absolute Error:</div>' 
+        f'<div style="font-size: 1.5em; padding-top: 1em">Mean Absolute Error:</div>' 
         f'<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em;"> {mae:.3f} </div>'
-        f'<div style="font-size: 1.2em">On average your model predicts the mobile traffic to be {mae:.3f} GB off from the actual value<br>'
-        f'That corresponds to <span style="font-weight: bold">{mape:.2f} %</span> off the actual value on average</div>'
     )
+
+    # Skip this line on initial load
+    if mae > 0:
+        s += (
+            f'<div style="font-size: 1.2em">On average your model predicts the mobile traffic to be {mae:.3f} GB off from the actual value<br>'
+            f'That corresponds to <span style="font-weight: bold">{mape:.2f} %</span> off the actual value on average</div>'
+        )
+    
     if mae <= 0:
-        s2 = "Press the button for a first run!"
-    elif mae < 2.3:
+        s2 = "Press the -> button for a first run!"
+    elif mae < 2.2:
         s2 = "Awesome job! Can you beat your own record?"
     elif mae < 3.5:
-        s2 = "You're on track, but you can do better. Try again!"
+        s2 = "You're on track, but you can do better.<br> Try again!"
     else:
-        s2 = "This is quite off :( Maybe try something else by resetting."
+        s2 = "This is quite off :( <br>Maybe try something else by resetting."
 
-    return s + f'<div style="font-size:1.5em;font-weight:bold;display: flex;justify-content: center;padding: 0.5em;">{s2}</div>'
+    return s + f'<div style="font-size:1.5em;font-weight:bold;display: flex;justify-content: center;text-align: center;padding-top: 0.5em;">{s2}</div>'
 
 result_widget = wd.HTML(
     value=result_text(0, 0)
@@ -187,12 +207,15 @@ def click_button(b):
 
 run_button.on_click(click_button)
 
-main = wd.HBox([
-    wd.VBox([slider_box, result_widget]),
-    wd.VBox([run_button, reset_button]),
-    wd.VBox([
-        fig1.canvas,
-        fig2.canvas
-    ]),
+main = wd.VBox([
+    wd.HTML('<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em">Workshop 02 - Predict Mobile Traffic</div>'),
+    wd.HBox([
+        wd.VBox([slider_box, result_widget]),
+        wd.VBox([run_button, reset_button]),
+        wd.VBox([
+            fig1.canvas,
+            fig2.canvas
+        ]),
+    ])
 ])
     
