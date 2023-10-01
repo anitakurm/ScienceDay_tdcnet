@@ -1,9 +1,10 @@
 print("Importing modules")
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 import ipywidgets as wd
-from scipy import stats
+from scipy import stats, interpolate
 import statsmodels.formula.api as smf
 from datetime import datetime as dtime
 
@@ -68,9 +69,7 @@ def make_sliders():
     slider_min = -8
     slider_max = 8
     slider_value = (slider_max+slider_min)/2
-    
-    layout = wd.Layout(width='auto', height='40px') #set width and height
-    
+        
     sliders = { 
       i : wd.FloatSlider(
         min=slider_min,
@@ -105,16 +104,21 @@ slider_box = wd.HBox([
 # ==================== PLOTS ======================
 print("Creating graphs")
 plt.ioff()
-fig1, ax1 = plt.subplots()
+mpl.rcParams["font.family"] = ["Ubuntu", "sans-serif"]
+mpl.rcParams["font.size"] = 10
+mpl.rcParams["figure.figsize"] = (6.0, 4.0) 
+
+fig1, ax1 = plt.subplots(layout='constrained')
 fig1.canvas.header_visible = False
 
-fig2, ax2 = plt.subplots()
+fig2, ax2 = plt.subplots(layout='constrained')
 fig2.canvas.header_visible = False
 
 def plot_manual_pred(ax, Y_pred_trans):
     ax.clear()
-    ax.scatter(Y_pred_trans,Y_actual)
-    ax.plot([0, max(max(Y_actual), max(Y_pred_trans))], [0,max(max(Y_actual), max(Y_pred_trans))], 'red')
+    ax.scatter(Y_pred_trans,Y_actual, alpha=0.6)
+    limits = [min(min(Y_actual), min(Y_pred_trans)), max(max(Y_actual), max(Y_pred_trans))]
+    ax.plot(limits, limits, 'red', linestyle="dashed", linewidth=0.8)
     ax.set_title("Mobile Traffic - Manual Model")
     ax.set_ylabel("Actual")
     ax.set_xlabel("Predicted")
@@ -122,7 +126,16 @@ def plot_manual_pred(ax, Y_pred_trans):
 
 def plot_prediction_log(ax):
     ax.clear()
-    ax.plot(prediction_log_df["Time"], prediction_log_df["Mean Absolute Error"])
+    date_np = prediction_log_df["Time"].values
+    value_np = prediction_log_df["Mean Absolute Error"].values
+    date_num = mpl.dates.date2num(date_np)
+    # smooth
+    if len(date_np) > 1:
+        date_num_smooth = np.linspace(date_num.min(), date_num.max(), 1000) 
+
+        value_np_smooth = interpolate.pchip_interpolate(date_num, value_np, date_num_smooth)
+        ax.plot(mpl.dates.num2date(date_num_smooth), value_np_smooth)
+        ax.scatter(date_np, value_np, marker=".", )
     ax.set_title("Your progress")
     ax.set_ylabel("Mean Absolute Error")
     ax.set_xlabel("Time")
