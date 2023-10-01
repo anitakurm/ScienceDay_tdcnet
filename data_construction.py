@@ -366,10 +366,6 @@ for i in range(I):
 
 # COMMAND ----------
 
-
-
-# COMMAND ----------
-
 correlated = np.random.multivariate_normal([1 for x in total_features], cov_matrix, size=12000)
 
 # COMMAND ----------
@@ -393,8 +389,7 @@ df.columns = total_features
 
 df['Number Of Residents'] = np.floor(np.exp(df['Number Of Residents']*2)).astype(int)
 df['Average Age'] = (df['Average Age']*60 + 20).astype(int)
-#df['Average Age'] = np.floor(np.exp(df['Average Age']*2)).astype(int)
-df['Distance To Nearest Tower [m]'] =( ((np.random.lognormal(0.55,0.2, 12000)*(-1) )* df['Mobile Traffic'] * df['Distance To Nearest Tower [m]']))*1500 +2000
+df['Distance To Nearest Tower [m]'] = (np.random.lognormal(0.55,0.2, 12000) * df['Mobile Traffic'] * df['Distance To Nearest Tower [m]'])*150
 #df['Distance To Nearest Tower [m]'] = np.random.lognormal(0.65,0.28, 12000)  * df['Mobile Traffic']
 df['Number Of Phones'] =(np.floor(df['Number Of Phones'] * 6)).astype(int)
 df['Number Of Computers'] = (np.floor(df['Number Of Computers'] * 3.3)).astype(int)
@@ -409,7 +404,7 @@ df['Customer Happiness'] = pd.cut(df['Customer Happiness'] ,[0,0.2,0.21,0.22,0.3
 
 # COMMAND ----------
 
- pd.Series(np.random.default_rng().exponential(scale=4, size=100)).hist()
+pd.Series(np.random.default_rng().exponential(scale=4, size=100)).hist()
 
 # COMMAND ----------
 
@@ -451,9 +446,11 @@ for i in cat_features:
 
 #export
 df_raw = df.copy()
-df
-df = df.fillna(0)
 df.to_csv('data/transformed_data_raw.csv')
+
+
+# COMMAND ----------
+
 
 
 # COMMAND ----------

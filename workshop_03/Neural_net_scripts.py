@@ -76,6 +76,7 @@ def initiate_and_run_ann(X, y, hidden_layer_sizes=(2,1,3), train_size=0.75, max_
       scores.append(model.score(X_test, y_test))
       train_scores.append(model.score(X_train, y_train))
       #print("Seed: {}, Score: {}".format(seed, mlr.score(X_test, y_test)))
+  
   actual_train = y_train
   predicted_train = model.predict(X_train)
 
