@@ -136,19 +136,25 @@ reset_button.on_click(reset_sliders)
 
 # ================= RESULT WIDGET ==================
 def result_text(mae, mape):
-    s = f"Mean Absolute Error: {mae:.3f} <br> " 
-    s += f"On average your model predicts the mobile traffic to be {mae:.3f} GB off from the actual value<br>"
-    s += f"That corresponds to {mape:.2f} % off the actual value on average <br><br>"
-    if mae == 0:
-        s += "Press the button for a first run"
+    s = (
+        f'<div style="font-size: 1.5em">Mean Absolute Error:</div>' 
+        f'<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em;"> {mae:.3f} </div>'
+        f'<div style="font-size: 1.2em">On average your model predicts the mobile traffic to be {mae:.3f} GB off from the actual value<br>'
+        f'That corresponds to <span style="font-weight: bold">{mape:.2f} %</span> off the actual value on average</div>'
+    )
+    if mae <= 0:
+        s2 = "Press the button for a first run!"
     elif mae < 2.3:
-        s += "Good job! Can you beat your own record?"
-    elif mae >= 2.3:
-        s += "Try again! You can do better"
-    return s
-    
+        s2 = "Awesome job! Can you beat your own record?"
+    elif mae < 3.5:
+        s2 = "You're on track, but you can do better. Try again!"
+    else:
+        s2 = "This is quite off :( Maybe try something else by resetting."
+
+    return s + f'<div style="font-size:1.5em;font-weight:bold;display: flex;justify-content: center;padding: 0.5em;">{s2}</div>'
+
 result_widget = wd.HTML(
-    value=result_text(10, 10)
+    value=result_text(0, 0)
 )
 
 # ================ BUTTON RUN FUNCTION =================
