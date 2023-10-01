@@ -65,17 +65,17 @@ def manual_predict(weights):
 SLIDER_DESC_STYLE = "font-size: 1.0em; font-weight:bold"
 
 def make_sliders():
-    slider_min = -10
-    slider_max = 10
+    slider_min = -8
+    slider_max = 8
     slider_value = (slider_max+slider_min)/2
     
     layout = wd.Layout(width='auto', height='40px') #set width and height
     
     sliders = { 
-      i : wd.IntSlider(
+      i : wd.FloatSlider(
         min=slider_min,
         max=slider_max,
-        step=1,
+        step=0.5,
         #description=i.replace("_", " ") + ': ',
         value=slider_value,
         #layout=wd.Layout(width='60%'),
