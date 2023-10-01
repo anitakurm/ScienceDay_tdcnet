@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
@@ -85,22 +86,42 @@ def initiate_and_run_ann(X, y, hidden_layer_sizes=(2,1,3), train_size=0.75, max_
   #print(np.average(scores))
   return scores, train_scores, actual_train, predicted_train, actual_test, predicted_test
 
+# ================= RESULT WIDGET ==================
 def result_text(mae, mape):
-    s = f"Mean Absolute Error: {mae} <br> " 
-    s += f"On average your model predicts the mobile traffic to be {mae} GB off from the actual value<br>"
-    s += f"That corresponds to {mape} % off the actual value on average <br><br>"
-    if mae == 0:
-        s += "Press the button for a first run"
-    elif mae < 2.3:
-        s += "Good job! Can you beat your own record?"
-    elif mae >= 2.3:
-        s += "Try again! You can do better"
-    return s
+    s = (
+        f'<div style="font-size: 1.5em; padding-top: 1em">Mean Absolute Error:</div>' 
+        f'<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em;"> {mae:.3f} </div>'
+    )
+
+    # Skip this line on initial load
+    if mae > 0:
+        s += (
+            f'<div style="font-size: 1.2em">On average your model predicts the mobile traffic to be {mae:.2f} GB off from the actual value<br>'
+            f'That corresponds to <span style="font-weight: bold">{mape:.2f} %</span> off the actual value on average</div>'
+        )
+        record = prediction_log_df.loc[:,"Mean Absolute Error"].min()
+        s3 = f'<div style="font-size: 1.2em"> Your current record: <span style="font-weight: bold">{record:.3f} </span></div>'
+    else:
+        s3 = ''
+    
+    if mae <= 0:
+        s2_val = "Press the -> button for a first run!"
+    elif mae < 1.7:
+        s2_val = "Awesome job! Can you beat your own record?"
+    elif mae < 3.2:
+        s2_val = "You're on track, but you can do better.<br> Try again!"
+    else:
+        s2_val = "This is quite off :( <br>Maybe try something else by resetting."
+
+    s2 = f'<div style="font-size:1.5em;font-weight:bold;display: flex;justify-content: center;text-align: center;padding-top: 0.5em; padding-bottom:0.5em">{s2_val}</div>'
+    
+    return s + s2 + s3
 
 def plot_pred(ax, y_predicted, y_actual):
     ax.clear()
-    ax.scatter(y_predicted,y_actual)
-    ax.plot([0, max(max(y_actual), max(y_predicted))], [0,max(max(y_actual), max(y_predicted))], 'red')
+    ax.scatter(y_predicted,y_actual, alpha=0.6)
+    limits = [min(min(y_actual), min(y_predicted)), max(max(y_actual), max(y_predicted))]
+    ax.plot(limits, limits, 'red', linestyle="dashed", linewidth=0.8)
     ax.set_title("Mobile Traffic - ML Model")
     ax.set_ylabel("Actual")
     ax.set_xlabel("Predicted")
@@ -108,6 +129,9 @@ def plot_pred(ax, y_predicted, y_actual):
 
 # ================= START WIDGET =====================
 plt.ioff()
+mpl.rcParams["font.family"] = ["Ubuntu", "sans-serif"]
+mpl.rcParams["font.size"] = 10
+mpl.rcParams["figure.figsize"] = (6.0, 4.0) 
 fig1, ax1 = plt.subplots()
 fig1.canvas.header_visible = False
 
@@ -117,10 +141,20 @@ slider_box = wd.HBox([
     wd.VBox([v for v in sliders.values()])
 ])
 
-run_button = wd.Button(description="=>", layout=wd.Layout(height='50px', width='50px'))
+button_style = dict(
+        button_color = "royalblue", 
+        font_weight="bold", 
+        font_size="1.2em"
+    )
+run_button = wd.Button(
+    #description="=>", 
+    icon="arrow-right",
+    layout=wd.Layout(height='50px', width='75px'),
+    style=button_style
+)
 
 result_widget = wd.HTML(
-    value=result_text(10, 10)
+    value=result_text(0, 0)
 )
 
 def click_button(b):
@@ -142,22 +176,36 @@ def click_button(b):
     fig1.canvas.draw()
     fig1.canvas.flush_events()
 
-    mape = round(np.mean(np.abs((actual_test - predicted_test)/actual_test))*100,2)
-    mae = round(sum(abs(actual_test- predicted_test))/len(actual_test),2)
+    mape = np.mean(np.abs((actual_test - predicted_test)/(np.maximum(actual_test, 0.1))))*100
+    mae = sum(abs(actual_test- predicted_test))/len(actual_test)
     
-    prediction_log.append((dtime.now(), ann_architecture, mape, mae))
+    prediction_log.append({
+        "Time": dtime.now(), 
+        "Mean Absolute Error": mae, 
+        "Mean Percentage Error" : mape,
+        "Architecture" : ann_architecture
+    })
+    global prediction_log_df
+    prediction_log_df = pd.DataFrame(prediction_log)
 
     result_widget.value = result_text(mae, mape)
 
 run_button.on_click(click_button)
 
 
-main = wd.HBox([
-    wd.VBox([slider_box, result_widget]),
-    run_button,
-    wd.VBox([
-        fig1.canvas,
-    ]),
+main = wd.VBox([
+    wd.HTML('<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em">Workshop 03 - Neural Networks</div>'),
+    wd.HBox([
+        wd.VBox([slider_box, result_widget]),
+        wd.VBox([
+           run_button,
+           #reset_button
+        ]),
+        wd.VBox([
+            fig1.canvas,
+            #fig2.canvas
+        ]),
+    ])
 ])
     
 
@@ -225,6 +273,12 @@ Y_actual = df[target_var]
 print("Prepared data")
 
 prediction_log = []
+prediction_log_df = pd.DataFrame(columns = [
+    "Time",
+    "Mean Absolute Error", 
+    "Mean Percentage Error",
+    "Architecture"
+])
 
 def make_sliders_A():
   # define slider range and value
@@ -253,12 +307,10 @@ def make_sliders_A():
 sliders = make_sliders_A()
 
 def read_sliders():
-    weights = {name : slider.value/10 for var_name, slider in sliders.items()}
+    weights = {var_name : slider.value/10 for var_name, slider in sliders.items()}
     return weights
 
   
-
-
 
 def run_ann_1():
   ann_architecture = []
@@ -280,15 +332,4 @@ def plot_manual_pred(ax, Y_pred_trans):
     ax.set_xlabel("Predicted")
     return ax
 
-def result_text(mae, mape):
-    s = f"Mean Absolute Error: {mae} <br> " 
-    s += f"On average your model predicts the mobile traffic to be {mae} GB off from the actual value<br>"
-    s += f"That corresponds to {mape} % off the actual value on average <br><br>"
-    if mae == 0:
-        s += "Press the button for a first run"
-    elif mae < 2.3:
-        s += "Good job! Can you beat your own record?"
-    elif mae >= 2.3:
-        s += "Try again! You can do better"
-    return s
 
