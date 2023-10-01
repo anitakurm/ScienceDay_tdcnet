@@ -181,9 +181,9 @@ def result_text(mae, mape):
     
     if mae <= 0:
         s2_val = "Press the -> button for a first run!"
-    elif mae < 2.2:
+    elif mae < 1.7:
         s2_val = "Awesome job! Can you beat your own record?"
-    elif mae < 3.5:
+    elif mae < 3.2:
         s2_val = "You're on track, but you can do better.<br> Try again!"
     else:
         s2_val = "This is quite off :( <br>Maybe try something else by resetting."
