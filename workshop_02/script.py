@@ -1,3 +1,4 @@
+print("Importing modules")
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -5,6 +6,7 @@ import ipywidgets as wd
 from scipy import stats
 import statsmodels.formula.api as smf
 from datetime import datetime as dtime
+
 print("Imports done")
 # Read Data
 df_raw = pd.read_csv('../data/transformed_data_raw.csv', index_col = 0)
@@ -44,6 +46,23 @@ prediction_log_df = pd.DataFrame(columns = [
     "Mean Percentage Error",
     "Weights"
 ])
+# =============== PREDICTION ====================
+
+def manual_predict(weights):
+    # Manually calculate y = alpha * x + beta
+    X = df_z.copy()
+    Y = X.pop(target_var)
+    for i in X.columns:
+        alpha = weights[i]
+        X[i] = df_z[i] * alpha 
+    Y_pred = X.sum(axis=1)
+    
+    Y_pred_trans = reverse_zscore(Y_pred, original_mean, original_std)
+
+    return Y_pred_trans
+
+# =============== SLIDERS ====================
+SLIDER_DESC_STYLE = "font-size: 1.0em; font-weight:bold"
 
 def make_sliders():
     slider_min = -10
@@ -60,7 +79,7 @@ def make_sliders():
         #description=i.replace("_", " ") + ': ',
         value=slider_value,
         #layout=wd.Layout(width='60%'),
-        #style={'description_width': '100%'}
+        style=dict(handle_color="royalblue"),
       ) for i in variables
     }
     return sliders
@@ -74,19 +93,23 @@ def reset_sliders(b):
 def read_sliders():
     weights = {var_name : slider.value/10 for var_name, slider in sliders.items()}
     return weights
+          
+def slider_description(v):
+    return f'<div style="{SLIDER_DESC_STYLE}">{v}</div>'
 
-def manual_predict(weights):
-    # Manually calculate y = alpha * x + beta
-    X = df_z.copy()
-    Y = X.pop(target_var)
-    for i in X.columns:
-        alpha = weights[i]
-        X[i] = df_z[i] * alpha 
-    Y_pred = X.sum(axis=1)
-    
-    Y_pred_trans = reverse_zscore(Y_pred, original_mean, original_std)
+slider_box = wd.HBox([
+    wd.VBox([wd.HTML(slider_description(v)) for v in sliders]),
+    wd.VBox([v for v in sliders.values()])
+])
 
-    return Y_pred_trans
+# ==================== PLOTS ======================
+print("Creating graphs")
+plt.ioff()
+fig1, ax1 = plt.subplots()
+fig1.canvas.header_visible = False
+
+fig2, ax2 = plt.subplots()
+fig2.canvas.header_visible = False
 
 def plot_manual_pred(ax, Y_pred_trans):
     ax.clear()
@@ -105,6 +128,13 @@ def plot_prediction_log(ax):
     ax.set_xlabel("Time")
     return ax
 
+# ================== BUTTONS =======================
+run_button = wd.Button(description="=>", layout=wd.Layout(height='50px', width='75px'))
+
+reset_button = wd.Button(description="Reset", layout=wd.Layout(height='50px', width='75px'))
+reset_button.on_click(reset_sliders)
+
+# ================= RESULT WIDGET ==================
 def result_text(mae, mape):
     s = f"Mean Absolute Error: {mae:.3f} <br> " 
     s += f"On average your model predicts the mobile traffic to be {mae:.3f} GB off from the actual value<br>"
@@ -117,28 +147,11 @@ def result_text(mae, mape):
         s += "Try again! You can do better"
     return s
     
-# ================= START WIDGET =====================
-plt.ioff()
-fig1, ax1 = plt.subplots()
-fig1.canvas.header_visible = False
-
-fig2, ax2 = plt.subplots()
-fig2.canvas.header_visible = False
-
-slider_box = wd.HBox([
-    wd.VBox([wd.HTML(v) for v in sliders]),
-    wd.VBox([v for v in sliders.values()])
-])
-
-run_button = wd.Button(description="=>", layout=wd.Layout(height='50px', width='75px'))
-
-reset_button = wd.Button(description="Reset", layout=wd.Layout(height='50px', width='75px'))
-reset_button.on_click(reset_sliders)
-
 result_widget = wd.HTML(
     value=result_text(10, 10)
 )
 
+# ================ BUTTON RUN FUNCTION =================
 def click_button(b):
     weights = read_sliders()
     Y_pred_trans = manual_predict(weights)
@@ -167,8 +180,6 @@ def click_button(b):
     result_widget.value = result_text(mae, mape)
 
 run_button.on_click(click_button)
-
-
 
 main = wd.HBox([
     wd.VBox([slider_box, result_widget]),
