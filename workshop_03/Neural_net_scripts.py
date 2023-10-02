@@ -229,6 +229,19 @@ prediction_log_df = pd.DataFrame(columns = [
     "Max iterations"
 ])
 
+def verify():
+    record_log = prediction_log_df.sort_values("Mean Absolute Error").iloc[0,:]
+    print(f"The record log:")
+    print(record_log)
+    actual_train, predicted_train, actual_test, predicted_test = initiate_and_run_ann(X, y, 
+                                                                                      train_size=record_log["Train test split"], 
+                                                                                      hidden_layer_sizes=record_log["Architecture"], 
+                                                                                      max_iter=record_log["Max iterations"])
+
+    mae = sum(abs(actual_test- predicted_test))/len(actual_test)
+    print(f"The calculated MAE: {mae}")
+
+
 def click_button(b):
     # do prediction, get train and test results
     ann_architecture = []
