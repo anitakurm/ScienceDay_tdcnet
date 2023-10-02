@@ -62,6 +62,16 @@ def manual_predict(weights):
 
     return Y_pred_trans
 
+def verify():
+    record_log = prediction_log_df.sort_values("Mean Absolute Error").iloc[0,:]
+    w = record_log.pop("Weights")
+    print(f"The record log:")
+    print(record_log)
+    print(f"with Weights: ")
+    print(pd.Series(w))
+    y_p = manual_predict(w)
+    mae = calc_mae(Y_actual, y_p)
+    print(f"The calculated MAE: {mae}")
 # =============== SLIDERS ====================
 SLIDER_DESC_STYLE = "font-size: 1.0em; font-weight:bold"
 
@@ -196,6 +206,11 @@ result_widget = wd.HTML(
     value=result_text(0, 0)
 )
 
+def calc_mape(Y_a, Y_p):
+    return np.mean(np.abs((Y_a - Y_p)/(np.maximum(Y_a, 0.1))))*100
+def calc_mae(Y_a, Y_p):
+    return sum(abs(Y_a - Y_p))/len(Y_a)
+
 # ================ BUTTON RUN FUNCTION =================
 def click_button(b):
     weights = read_sliders()
@@ -205,8 +220,8 @@ def click_button(b):
     fig1.canvas.draw()
     fig1.canvas.flush_events()
 
-    mape = np.mean(np.abs((Y_actual - Y_pred_trans)/(np.maximum(Y_actual, 0.1))))*100
-    mae = sum(abs(Y_actual - Y_pred_trans))/len(Y_actual)
+    mape = calc_mape(Y_actual, Y_pred_trans)
+    mae = calc_mae(Y_actual, Y_pred_trans)
     
     prediction_log.append({
         "Time": dtime.now(), 
