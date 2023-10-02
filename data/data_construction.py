@@ -446,7 +446,7 @@ for i in cat_features:
 
 #export
 df_raw = df.copy()
-df.to_csv('data/transformed_data_raw.csv')
+df.to_csv('transformed_data_raw.csv')
 
 
 # COMMAND ----------
@@ -467,7 +467,7 @@ for i in cat_features:
   dictionary = dict(zip(df[i].value_counts().index.tolist(), cat_variables[i]['names']))
   df[i] = df[i].map( dictionary)
 
-df.to_csv('data/transformed_data_for_viewing.csv')
+df.to_csv('transformed_data_for_viewing.csv')
 
 
 # COMMAND ----------
