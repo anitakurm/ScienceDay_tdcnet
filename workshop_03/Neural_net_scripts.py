@@ -53,17 +53,19 @@ def set_up_layer_sliders():
         min=slider_min,
         max=slider_max,
         step=1,
-        description='nodes: ',
+        #description='nodes: ',
         value=slider_value,
         #layout=wd.Layout(width='60%'),
         #style={'description_width': '100%'}
+        style=dict(handle_color="royalblue"),
       ) for i in layer_list
     }
   slider_split= wd.IntSlider( min=1,
                             max=90,
                             step=1,
-                            description=':',
+                            #description=':',
                             value=50,
+                            style=dict(handle_color="royalblue"),
                           )
   
   sliders['% of data for train'] = slider_split
@@ -179,10 +181,16 @@ fig3.canvas.header_visible = False
 
 sliders = set_up_layer_sliders()
 
+SLIDER_DESC_STYLE = "font-size: 1.0em; font-weight:bold"
+
+def slider_description(v):
+    return f'<div style="{SLIDER_DESC_STYLE}">{v}</div>'
+
 slider_box = wd.HBox([
-    wd.VBox([wd.HTML(v) for v in sliders]),
-    wd.VBox([v for v in sliders.values()]),
+    wd.VBox([wd.HTML(slider_description(v)) for v in sliders]),
+    wd.VBox([v for v in sliders.values()])
 ])
+
 
 
 
