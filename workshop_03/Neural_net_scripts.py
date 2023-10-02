@@ -31,7 +31,7 @@ def set_up_layer_sliders():
   # define slider range and value
   slider_min = 1
   slider_max = 40
-  slider_value = 10
+  slider_value = 5
 
   # set up slider layout
   layout = wd.Layout(width='auto', height='40px') #set width and height
@@ -54,7 +54,7 @@ def set_up_layer_sliders():
                             max=90,
                             step=1,
                             #description=':',
-                            value=50,
+                            value=30,
                             style=dict(handle_color="royalblue"),
                           )
   
@@ -63,7 +63,7 @@ def set_up_layer_sliders():
   slider_epoch= wd.IntSlider(min=10,
                             max=800,
                             step=10,
-                            description=':',
+                            #description=':',
                             value=100,
                           )
   
@@ -99,7 +99,7 @@ def train_text(train_state):
     # Skip this line on initial load
     if train_state:
         s = (
-               '<div style="font-size:1.5em;font-weight:bold;display: flex;justify-content: center;text-align: center;padding-top: 0.5em; padding-bottom:0.5em">Your Neural Network model is training 🏋️🦾 <br>'
+               '<div style="font-size:1.5em;font-weight:bold;display: flex;justify-content: center;text-align: center;padding-top: 0.5em; padding-bottom:0.5em">Your Neural Network model is training 🏋️🦾'
             )
 
         
@@ -125,7 +125,7 @@ def result_text(mae, mape):
         s2_val = "Press the ➡ button for a first run!"
     elif mae < 1.0:
         s2_val = "Awesome job! 💪 Can you beat your own record?"
-    elif mae < 1.3:
+    elif mae < 1.4:
         s2_val = "You're on track, but you can do better! 😉 <br> Try again!"
     else:
         s2_val = "This is quite off 🤔 <br>Maybe try something else by resetting."
