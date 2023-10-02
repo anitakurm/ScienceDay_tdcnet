@@ -200,10 +200,14 @@ button_style = dict(
         font_weight="bold", 
         font_size="1.2em"
     )
+
+button_layout = wd.Layout(height='50px', width='75px')
+waiting_layout = wd.Layout(height='0px', width='0px')
+
 run_button = wd.Button(
     #description="=>", 
     icon="arrow-right",
-    layout=wd.Layout(height='50px', width='75px'),
+    layout=button_layout,
     style=button_style
 )
 
@@ -241,6 +245,8 @@ def click_button(b):
     #print(f'Training your neural net {ann_architecture_tup}, train size {train_size}, iters {max_iter}')
     train_state = 1
     result_widget.value = train_text(train_state)
+    run_button.layout = waiting_layout
+
     actual_train, predicted_train, actual_test, predicted_test = initiate_and_run_ann(X, y, 
                                                                                       train_size=train_size, 
                                                                                       hidden_layer_sizes=ann_architecture_tup, 
@@ -277,6 +283,7 @@ def click_button(b):
     fig3.canvas.draw()
     fig3.canvas.flush_events()
 
+    run_button.layout = button_layout
     result_widget.value = result_text(mae, mape)
 
 run_button.on_click(click_button)
