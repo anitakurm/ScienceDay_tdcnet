@@ -190,13 +190,13 @@ def result_text(mae, mape):
         s3 = ''
     
     if mae <= 0:
-        s2_val = "Press the -> button for a first run!"
-    elif mae < 1.7:
-        s2_val = "Awesome job! Can you beat your own record?"
+        s2_val = "Press the ➡ button for a first run!"
+    elif mae < 1.5:
+        s2_val = "Awesome job! 💪 Can you beat your own record?"
     elif mae < 3.2:
-        s2_val = "You're on track, but you can do better.<br> Try again!"
+        s2_val = "You're on track, but you can do better! 😉 <br> Try again!"
     else:
-        s2_val = "This is quite off :( <br>Maybe try something else by resetting."
+        s2_val = "This is quite off 🤔 <br>Maybe try something else by resetting."
 
     s2 = f'<div style="font-size:1.5em;font-weight:bold;display: flex;justify-content: center;text-align: center;padding-top: 0.5em; padding-bottom:0.5em">{s2_val}</div>'
     
