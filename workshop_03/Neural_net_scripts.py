@@ -20,7 +20,7 @@ warnings.filterwarnings('ignore')
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import stats
+from scipy import interpolate
 import statsmodels.formula.api as smf
 from datetime import datetime as dtime
 print("Imports done")
@@ -60,7 +60,7 @@ def set_up_layer_sliders():
       ) for i in layer_list
     }
   slider_split= wd.IntSlider( min=1,
-                            max=99,
+                            max=90,
                             step=1,
                             description=':',
                             value=50,
@@ -93,13 +93,23 @@ def initiate_and_run_ann(X, y, hidden_layer_sizes=(2,1,3), train_size=0.75, max_
   return actual_train, predicted_train, actual_test, predicted_test
 
 # ================= RESULT WIDGET ==================
+def train_text(train_state):
+
+    # Skip this line on initial load
+    if train_state:
+        s = (
+               '<div style="font-size:1.5em;font-weight:bold;display: flex;justify-content: center;text-align: center;padding-top: 0.5em; padding-bottom:0.5em">Your Neural Network model is training 🏋️🦾 <br>'
+            )
+
+        
+    return s
+    
 def result_text(mae, mape):
     s = (
         f'<div style="font-size: 1.5em; padding-top: 1em">Mean Absolute Error:</div>' 
         f'<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em;"> {mae:.3f} </div>'
     )
 
-    # Skip this line on initial load
     if mae > 0:
         s += (
             f'<div style="font-size: 1.2em">On average your model predicts the mobile traffic to be {mae:.2f} GB off from the actual value<br>'
@@ -133,6 +143,25 @@ def plot_pred(ax, y_predicted, y_actual, title):
     ax.set_xlabel("Predicted")
     return ax
 
+def plot_prediction_log(ax):
+    ax.clear()
+    date_np = prediction_log_df["Time"].values
+    value_np = prediction_log_df["Mean Absolute Error"].values
+    date_num = mpl.dates.date2num(date_np)
+    # smooth
+    if len(date_np) > 1:
+        date_num_smooth = np.linspace(date_num.min(), date_num.max(), 1000) 
+
+        value_np_smooth = interpolate.pchip_interpolate(date_num, value_np, date_num_smooth)
+        ax.plot(mpl.dates.num2date(date_num_smooth), value_np_smooth)
+        ax.scatter(date_np, value_np, marker=".", )
+    ax.set_title("Your progress")
+    ax.set_ylabel("Mean Absolute Error")
+    ax.set_xlabel("Time")
+    return ax
+
+
+
 # ================= START WIDGET =====================
 plt.ioff()
 mpl.rcParams["font.family"] = ["Ubuntu", "sans-serif"]
@@ -144,6 +173,9 @@ fig1.canvas.header_visible = False
 
 fig2, ax2 = plt.subplots(layout='constrained')
 fig2.canvas.header_visible = False
+
+fig3, ax3 = plt.subplots(layout='constrained')
+fig3.canvas.header_visible = False
 
 sliders = set_up_layer_sliders()
 
@@ -194,19 +226,25 @@ def click_button(b):
           train_size = slider.value/100
     
     ann_architecture_tup = tuple(ann_architecture)
-    print(f'Training your neural net {ann_architecture_tup}')
+    #print(f'Training your neural net {ann_architecture_tup}')
+    train_state = 1
+    result_widget.value = train_text(train_state)
     actual_train, predicted_train, actual_test, predicted_test = initiate_and_run_ann(X, y, train_size=train_size, hidden_layer_sizes=ann_architecture_tup)
 
-    print('Ready!')
-    plot_pred(ax1, y_predicted = predicted_test, y_actual=actual_test, title='Mobile Traffic - Neural Net (Test)')
+    #print('Ready!')
+    train_state=0
+    mape = np.mean(np.abs((actual_test - predicted_test)/(np.maximum(actual_test, 0.1))))*100
+    mae = sum(abs(actual_test- predicted_test))/len(actual_test)
+    #mape_train = np.mean(np.abs((actual_test - predicted_test)/(np.maximum(actual_test, 0.1))))*100
+    mae_train = sum(abs(actual_train- predicted_train))/len(actual_train)
+
+    plot_pred(ax1, y_predicted = predicted_test, y_actual=actual_test, title=f'Mobile Traffic: Predicted vs Actual - test score {mae:.3f}')
     fig1.canvas.draw()
     fig1.canvas.flush_events()
     
-    plot_pred(ax2, y_predicted = predicted_train, y_actual=actual_train, title='Mobile Traffic - Neural Net (Train)')
+    plot_pred(ax2, y_predicted = predicted_train, y_actual=actual_train, title=f'Mobile Traffic: Predicted vs Actual - train score {mae_train:.3f}')
     fig2.canvas.draw()
     fig2.canvas.flush_events()
-    mape = np.mean(np.abs((actual_test - predicted_test)/(np.maximum(actual_test, 0.1))))*100
-    mae = sum(abs(actual_test- predicted_test))/len(actual_test)
     
     prediction_log.append({
         "Time": dtime.now(), 
@@ -217,6 +255,11 @@ def click_button(b):
     global prediction_log_df
     prediction_log_df = pd.DataFrame(prediction_log)
 
+
+    plot_prediction_log(ax3)
+    fig3.canvas.draw()
+    fig3.canvas.flush_events()
+
     result_widget.value = result_text(mae, mape)
 
 run_button.on_click(click_button)
@@ -225,7 +268,7 @@ run_button.on_click(click_button)
 main = wd.VBox([
     wd.HTML('<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em">Workshop 03 - Neural Networks</div>'),
     wd.HBox([
-        wd.VBox([slider_box, result_widget]),
+        wd.VBox([slider_box, result_widget, fig3.canvas]),
         wd.VBox([
            run_button,
            #reset_button
