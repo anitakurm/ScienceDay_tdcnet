@@ -2,22 +2,12 @@
 import pandas as pd
 import ipywidgets as wd
 import numpy as np
-from scipy import stats
-import statsmodels.formula.api as smf
 from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import seaborn as sns
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.preprocessing import RobustScaler
-from sklearn.preprocessing import Normalizer
 import warnings
 warnings.filterwarnings('ignore')
-
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import interpolate
@@ -67,6 +57,15 @@ def set_up_layer_sliders():
                           )
   
   sliders['% of data for train'] = slider_split
+
+  slider_epoch= wd.IntSlider(min=10,
+                            max=800,
+                            step=10,
+                            description=':',
+                            value=100,
+                          )
+  
+  sliders['Number of learning iterations'] = slider_epoch
   return sliders
 
 
@@ -78,7 +77,7 @@ def initiate_and_run_ann(X, y, hidden_layer_sizes=(2,1,3), train_size=0.75, max_
   model = MLPRegressor(hidden_layer_sizes = hidden_layer_sizes, 
                       activation ='relu', alpha=0.0001,
                       solver='adam', learning_rate='constant',
-                      max_iter= 800, n_iter_no_change =50, random_state=seed
+                      max_iter= max_iter, n_iter_no_change =50, random_state=seed
           )
   model.fit(X_train, y_train)
   #score = model.score(X_test, y_test))
@@ -212,7 +211,9 @@ prediction_log_df = pd.DataFrame(columns = [
     "Time",
     "Mean Absolute Error", 
     "Mean Percentage Error",
-    "Architecture"
+    "Architecture",
+    "Train test split",
+    "Max iterations"
 ])
 
 def click_button(b):
@@ -222,14 +223,19 @@ def click_button(b):
       if 'Layer' in var_name:
          layer_size = slider.value
          ann_architecture.append(layer_size)
-      else:
+      elif '%' in var_name:
           train_size = slider.value/100
+      else:
+          max_iter = slider.value
     
     ann_architecture_tup = tuple(ann_architecture)
-    #print(f'Training your neural net {ann_architecture_tup}')
+    #print(f'Training your neural net {ann_architecture_tup}, train size {train_size}, iters {max_iter}')
     train_state = 1
     result_widget.value = train_text(train_state)
-    actual_train, predicted_train, actual_test, predicted_test = initiate_and_run_ann(X, y, train_size=train_size, hidden_layer_sizes=ann_architecture_tup)
+    actual_train, predicted_train, actual_test, predicted_test = initiate_and_run_ann(X, y, 
+                                                                                      train_size=train_size, 
+                                                                                      hidden_layer_sizes=ann_architecture_tup, 
+                                                                                      max_iter=max_iter)
 
     #print('Ready!')
     train_state=0
@@ -250,7 +256,9 @@ def click_button(b):
         "Time": dtime.now(), 
         "Mean Absolute Error": mae, 
         "Mean Percentage Error" : mape,
-        "Architecture" : ann_architecture
+        "Architecture" : ann_architecture,
+        "Train test split": train_size,
+        "Max iterations": max_iter
     })
     global prediction_log_df
     prediction_log_df = pd.DataFrame(prediction_log)
