@@ -30,7 +30,7 @@ def fetch_data():
 def set_up_layer_sliders():
   # define slider range and value
   slider_min = 1
-  slider_max = 40
+  slider_max = 30
   slider_value = 5
 
   # set up slider layout
@@ -51,7 +51,7 @@ def set_up_layer_sliders():
       ) for i in layer_list
     }
   slider_split= wd.IntSlider( min=1,
-                            max=90,
+                            max=85,
                             step=1,
                             #description=':',
                             value=30,
@@ -61,7 +61,7 @@ def set_up_layer_sliders():
   sliders['% of data for train'] = slider_split
 
   slider_epoch= wd.IntSlider(min=10,
-                            max=800,
+                            max=600,
                             step=10,
                             #description=':',
                             value=100,
@@ -79,7 +79,7 @@ def initiate_and_run_ann(X, y, hidden_layer_sizes=(2,1,3), train_size=0.75, max_
   model = MLPRegressor(hidden_layer_sizes = hidden_layer_sizes, 
                       activation ='relu', alpha=0.0001,
                       solver='adam', learning_rate='constant',
-                      max_iter= max_iter, n_iter_no_change =50, random_state=seed
+                      max_iter= max_iter, n_iter_no_change =25, random_state=seed
           )
   model.fit(X_train, y_train)
   #score = model.score(X_test, y_test))
@@ -123,7 +123,7 @@ def result_text(mae, mape):
     
     if mae <= 0:
         s2_val = "Press the ➡ button for a first run!"
-    elif mae < 1.0:
+    elif mae < 1.02:
         s2_val = "Awesome job! 💪 Can you beat your own record?"
     elif mae < 1.4:
         s2_val = "You're on track, but you can do better! 😉 <br> Try again!"
