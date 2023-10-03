@@ -108,7 +108,7 @@ def train_text(train_state):
 def result_text(mae, mape):
     s = (
         f'<div style="font-size: 1.5em; padding-top: 1em">Mean Absolute Error:</div>' 
-        f'<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em;"> {mae:.3f} </div>'
+        f'<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em;"> {mae:.4f} </div>'
     )
 
     if mae > 0:
@@ -117,15 +117,15 @@ def result_text(mae, mape):
             f'That corresponds to <span style="font-weight: bold">{mape:.2f} %</span> off the actual value on average</div>'
         )
         record = prediction_log_df.loc[:,"Mean Absolute Error"].min()
-        s3 = f'<div style="font-size: 1.2em"> Your current record: <span style="font-weight: bold">{record:.3f} </span></div>'
+        s3 = f'<div style="font-size: 1.2em"> Your current record: <span style="font-weight: bold">{record:.4f} </span></div>'
     else:
         s3 = ''
     
     if mae <= 0:
         s2_val = "Press the ➡ button for a first run!"
-    elif mae < 1.02:
+    elif mae < 1.04:
         s2_val = "Awesome job! 💪 Can you beat your own record?"
-    elif mae < 1.4:
+    elif mae < 1.1:
         s2_val = "You're on track, but you can do better! 😉 <br> Try again!"
     else:
         s2_val = "This is quite off 🤔 <br>Maybe try something else by resetting."
