@@ -79,7 +79,7 @@ def verify():
 SLIDER_DESC_STYLE = "font-size: 1.0em; font-weight:bold"
 
 
-def make_sliders():
+def make_sliders_num():
     slider_min = -10
     slider_max = 10
     slider_value = (slider_max + slider_min) / 2
@@ -99,7 +99,7 @@ def make_sliders():
     return sliders
 
 
-sliders = make_sliders()
+sliders = make_sliders_num()
 
 
 def reset_sliders(b):
@@ -132,6 +132,7 @@ mpl.rcParams["figure.figsize"] = (6.0, 4.0)
 
 fig1, ax1 = plt.subplots(layout="constrained")
 fig1.canvas.header_visible = False
+ax1.annotate("local max", xy=(3, 1), xycoords="data")
 
 fig2, ax2 = plt.subplots(layout="constrained")
 fig2.canvas.header_visible = False
@@ -279,6 +280,9 @@ main = wd.VBox(
             [
                 wd.VBox([slider_box, result_widget]),
                 wd.VBox([run_button, reset_button]),
+                wd.HTML(
+                    '<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em">test</div>'
+                ),
                 wd.VBox([fig1.canvas, fig2.canvas]),
             ]
         ),

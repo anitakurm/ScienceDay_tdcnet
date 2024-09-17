@@ -83,11 +83,11 @@ final_df_1.reset_index(drop=True, inplace=True)
 
 
 data = {
-    "Mobile Traffic": [1, -0.3, 0.3, 0.4, 0],
-    "Occupation": [-0.3, 1, 0.01, 0.01, 0.01],
-    "Family Type": [0.3, 0.01, 1, 0.01, 0.01],
-    "Family Interest": [0.4, 0.01, 0.01, 1, 0.01],
-    "House Type": [0, 0.01, 0.01, 0.01, 1],
+    "Mobile Traffic": [1, 0.00001, -0.2, -0.6, -0.2],
+    "Occupation": [0.00001, 1, -0.00001, -0.00001, -0.00001],
+    "Family Type": [-0.2, -0.00001, 1, -0.00001, -0.00001],
+    "Family Interest": [-0.6, -0.00001, -0.00001, 1, -0.00001],
+    "House Type": [-0.2, -0.00001, -0.00001, -0.00001, 1],
 }
 
 df = pd.DataFrame(data)
@@ -113,7 +113,7 @@ final_df_2.reset_index(drop=True, inplace=True)
 
 
 data = {
-    "Mobile Traffic": [1, 0.7, -0.6, -0.6, 0.4, 0.3, 0.2, -0.3, 0.5],
+    "Mobile Traffic": [1, 0.7, -0.6, -0.6, 0.4, 0.3, 0.0, 0, 0.5],
     "Number Of Residents": [0.7, 1, 0.01, 0.01, 0.7, 0.5, 0.2, 0.01, 0.01],
     "Average Age": [-0.6, 0.01, 1, 0.01, 0.3, 0.3, 0.2, 0.01, 0.01],
     "Distance To Nearest Tower [m]": [
@@ -128,9 +128,9 @@ data = {
         -0.7,
     ],
     "Number Of Phones": [0.4, 0.7, 0.3, 0.01, 1, 0.5, 0.2, 0.01, 0.01],
-    "Number Of Computers": [0.3, 0.5, 0.3, 0.01, 0.5, 1, 0.2, 0.01, 0.01],
-    "Number Of Tvs": [0.2, 0.2, 0.2, 0.01, 0.2, 0.2, 1, 0.01, 0.01],
-    "Number Of Pets": [-0.3, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 1, 0.01],
+    "Number Of Computers": [0.0, 0.5, 0.3, 0.01, 0.5, 1, 0.2, 0.01, 0.01],
+    "Number Of Tvs": [0.0, 0.2, 0.2, 0.01, 0.2, 0.2, 1, 0.01, 0.01],
+    "Number Of Pets": [0, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 1, 0.01],
     "Customer Happiness": [0.5, 0.01, 0.01, -0.7, 0.01, 0.01, 0.01, 0.01, 1],
 }
 
@@ -222,7 +222,6 @@ df.to_csv("data/transformed_data_raw.csv")
 
 # Transform Categorical features from numeric to discrete
 for i in cat_features:
-    i = "Occupation"
     #  bins= df[i].quantile(np.linspace(0,1,len(cat_variables[i]['values']) + 1))
     #  df[i] = pd.cut(df[i],bins, labels=cat_variables[i]['names'])
     val_list = df[i].value_counts().index.tolist()
