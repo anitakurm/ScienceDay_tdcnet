@@ -52,9 +52,9 @@ n_samples = 1200
 
 
 data = {
-    "Mobile Traffic": [1, 0.6, 0.5, 0.3, 0.1, 0.4],
-    "Time Spend On YouTube [min]": [0.6, 1, 0.1, 0.01, 0.01, 0.01],
-    "Time Spend On TikTok [min]": [0.5, 0.1, 1, 0.01, 0.01, 0.01],
+    "Mobile Traffic": [1, 0.7, 0.6, 0.3, 0.1, 0.4],
+    "Time Spend On YouTube [min]": [0.7, 1, 0.1, 0.01, 0.01, 0.01],
+    "Time Spend On TikTok [min]": [0.6, 0.1, 1, 0.01, 0.01, 0.01],
     "Time Spend On Instagram [min]": [0.3, 0.01, 0.01, 1, 0.01, 0.01],
     "Time Spend On Spotify [min]": [0.1, 0.01, 0.01, 0.01, 1, 0.01],
     "Size of home [m2]": [0.4, 0.01, 0.01, 0.01, 0.01, 1],
@@ -113,11 +113,11 @@ final_df_2.reset_index(drop=True, inplace=True)
 
 
 data = {
-    "Mobile Traffic": [1, 0.7, -0.6, -0.5, 0.4, 0.3, 0.2, -0.3, 0.5],
+    "Mobile Traffic": [1, 0.7, -0.6, -0.6, 0.4, 0.3, 0.2, -0.3, 0.5],
     "Number Of Residents": [0.7, 1, 0.01, 0.01, 0.7, 0.5, 0.2, 0.01, 0.01],
     "Average Age": [-0.6, 0.01, 1, 0.01, 0.3, 0.3, 0.2, 0.01, 0.01],
     "Distance To Nearest Tower [m]": [
-        -0.5,
+        -0.6,
         0.01,
         0.01,
         1,
