@@ -217,6 +217,7 @@ for i in cat_features:
 # export
 df_raw = df.copy()
 df = df.fillna(0)
+df = df.sample(frac=1).reset_index(drop=True)
 df.to_csv("data/transformed_data_raw.csv")
 
 # Transform Categorical features from numeric to discrete
@@ -230,7 +231,7 @@ for i in cat_features:
 
     dictionary = dict(zip(val_list, cat_variables[i]["names"]))
     df[i] = df[i].map(dictionary)
-
+df = df.sample(frac=1).reset_index(drop=True)
 df.to_csv("data/transformed_data_for_viewing.csv")
 
 
