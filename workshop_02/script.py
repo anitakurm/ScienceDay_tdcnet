@@ -280,9 +280,6 @@ main = wd.VBox(
             [
                 wd.VBox([slider_box, result_widget]),
                 wd.VBox([run_button, reset_button]),
-                wd.HTML(
-                    '<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em">test</div>'
-                ),
                 wd.VBox([fig1.canvas, fig2.canvas]),
             ]
         ),
