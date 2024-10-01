@@ -8,6 +8,7 @@ from scipy import stats, interpolate
 import statsmodels.api as sm  # Import statsmodels
 from sklearn.model_selection import KFold
 from datetime import datetime as dtime
+import time
 
 print("Imports done")
 # Read Data
@@ -242,17 +243,17 @@ intro_text = """
 intro_widget = wd.HTML(value=intro_text)
 
 # ================= RESULT WIDGET ==================
-def result_text(mae, mape):
+def result_text(mae, mape, training_percentage):
     s = (
         f'<div style="font-size: 1.5em; padding-top: 1em">Mean Absolute Error:</div>'
         f'<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em;"> {mae:.3f} </div>'
     )
 
-    # Skip this line on initial load
     if mae > 0:
         s += (
             f'<div style="font-size: 1.2em">On average your model predicts the mobile traffic to be {mae:.2f} GB off from the actual value<br>'
             f'That corresponds to <span style="font-weight: bold">{mape:.2f} %</span> off the actual value on average</div>'
+            f'<div style="font-size: 1.2em"> Training Data: <span style="font-weight: bold">{training_percentage * 100:.0f}%</span> </div>'
         )
         record = prediction_log_df.loc[:, "Mean Absolute Error"].min()
         s3 = f'<div style="font-size: 1.2em"> Your current record: <span style="font-weight: bold">{record:.3f} </span></div>'
@@ -274,7 +275,7 @@ def result_text(mae, mape):
 
     return s + s2 + s3
 
-result_widget = wd.HTML(value=result_text(0, 0))
+result_widget = wd.HTML(value=result_text(0, 0, 0))
 
 def calc_mape(Y_a, Y_p):
     return np.mean(np.abs((Y_a - Y_p) / (np.maximum(Y_a, 0.1)))) * 100
@@ -287,49 +288,48 @@ def update_sliders_to_optimal(weights):
         slider.value = weights[var_name] * 10  # Undo the earlier division by 10
 
 def click_button(b):
-    # Get the selected percentage of training data
-    training_percentage = float(training_data_selector.value.strip('%')) / 100.0
-    n_train = int(len(df_z) * training_percentage)
-    df_train_z = df_z.iloc[:n_train]
+    # List of training percentages to cycle through, from 10% to 80% in 10% increments
+    training_percentages = [i / 100 for i in range(10, 81, 10)]
 
-    avg_mae, avg_mape, optimal_weights = perform_cross_validation(df_train_z)
-    update_sliders_to_optimal(optimal_weights)
+    for training_percentage in training_percentages:
+        n_train = int(len(df_z) * training_percentage)
+        df_train_z = df_z.iloc[:n_train]
 
-    # Now predict with these optimal weights using the training data
-    Y_train_actual = df.iloc[:n_train][target_var]
-    Y_pred_trans = manual_predict(optimal_weights, df_train_z)
+        avg_mae, avg_mape, optimal_weights = perform_cross_validation(df_train_z)
+        update_sliders_to_optimal(optimal_weights)
 
-    plot_manual_pred(ax1, Y_pred_trans, Y_train_actual)
-    fig1.canvas.draw()
-    fig1.canvas.flush_events()
+        # Now predict with these optimal weights using the training data
+        Y_train_actual = df.iloc[:n_train][target_var]
+        Y_pred_trans = manual_predict(optimal_weights, df_train_z)
 
-    prediction_log.append(
-        {
-            "Time": dtime.now(),
-            "Mean Absolute Error": avg_mae,
-            "Mean Percentage Error": avg_mape,
-            "Weights": optimal_weights.to_dict(),  # Convert Series to dictionary
-        }
-    )
+        plot_manual_pred(ax1, Y_pred_trans, Y_train_actual)
+        fig1.canvas.draw()
+        fig1.canvas.flush_events()
 
-    global prediction_log_df
-    prediction_log_df = pd.DataFrame(prediction_log)
+        prediction_log.append(
+            {
+                "Time": dtime.now(),
+                "Mean Absolute Error": avg_mae,
+                "Mean Percentage Error": avg_mape,
+                "Weights": optimal_weights.to_dict(),  # Convert Series to dictionary
+            }
+        )
 
-    plot_prediction_log(ax2)
-    fig2.canvas.draw()
-    fig2.canvas.flush_events()
+        global prediction_log_df
+        prediction_log_df = pd.DataFrame(prediction_log)
 
-    result_widget.value = result_text(avg_mae, avg_mape)
+        plot_prediction_log(ax2)
+        fig2.canvas.draw()
+        fig2.canvas.flush_events()
+
+        result_widget.value = result_text(avg_mae, avg_mape, training_percentage)
+
+        # Wait a short time to create an animation effect
+        time.sleep(0.5)  # Adjusted sleep time for smooth and noticeable animation
+
+# ... (rest of your existing code) ...
 
 run_button.on_click(click_button)
-
-# Dropdown for selecting the amount of training data
-training_data_selector = wd.Dropdown(
-    options=["30%", "50%", "80%"],
-    value="30%",
-    description="Training Data:",
-    style=dict(description_width='initial'),
-)
 
 # Main layout
 main = wd.VBox(
@@ -338,7 +338,7 @@ main = wd.VBox(
             '<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em">Workshop 03 - Let Machines Learn </div>'
         ),
         intro_widget,
-        training_data_selector,
+        # Layout adjustment since we removed the dropdown
         wd.HBox(
             [
                 wd.VBox([slider_box, result_widget]),
