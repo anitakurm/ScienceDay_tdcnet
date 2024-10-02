@@ -335,7 +335,7 @@ run_button.on_click(click_button)
 main = wd.VBox(
     [   
         wd.HTML(
-            '<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em">Workshop 03 - Let Machines Learn </div>'
+            '<div style="font-size: 2em; font-weight: bold;display: flex;justify-content: center;padding: 1em">Workshop 02 - Let Machines Learn </div>'
         ),
         intro_widget,
         # Layout adjustment since we removed the dropdown

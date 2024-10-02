@@ -336,7 +336,7 @@ def click_button(b):
 run_button.on_click(click_button)
 
 main = wd.VBox([
-    wd.HTML('<div style="font-size: 2em; font-weight: bold; display: flex; justify-content: center; padding: 1em">Workshop 03 - Neural Networks</div>'),
+    wd.HTML('<div style="font-size: 2em; font-weight: bold; display: flex; justify-content: center; padding: 1em">Workshop 02 - Neural Networks</div>'),
     wd.HBox([
         wd.VBox([slider_box, result_widget, fig3.canvas]),
         wd.VBox([
